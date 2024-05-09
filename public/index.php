@@ -2,44 +2,57 @@
 
 require_once "../src/autoload.php";
 
-use \PamutProba\App\Client;
-use \PamutProba\Utility\Path;
-use \PamutProba\Http\Method;
-use \PamutProba\Exception\HttpException;
-use \PamutProba\Http\Status;
-use \PamutProba\App\View\HtmlView;
-use \PamutProba\App\View\JsonView;
+use PamutProba\App\Client;
+use PamutProba\App\Config;
+use PamutProba\App\View\HtmlView;
+use PamutProba\App\View\JsonView;
+use PamutProba\Entity\Factory\ProjectFactory;
+use PamutProba\Exception\HttpException;
+use PamutProba\Http\Method;
+use PamutProba\Http\Status;
+use PamutProba\Utility\Development\Development;
+use PamutProba\Utility\Development\DevelopmentService;
+use PamutProba\Utility\Development\VoidDevelopmentService;
+use PamutProba\Utility\Path;
 
 Path::setBase(__DIR__ . DIRECTORY_SEPARATOR . "..");
 
 set_error_handler(/**
  * @throws Exception
  */ function (int $errno, string $errstr) {
-    throw new Exception($errstr, $errno);
-}, E_ALL);
+    throw new \Exception($errstr, $errno);
+});
 
 try
 {
+    Development::setEnvironment(
+        Config::get("APP_ENV") === "dev" ? new DevelopmentService() : new VoidDevelopmentService()
+    );
+
     Client::create($_SERVER, $_GET, $_POST);
     $request = Client::request();
 
     Client::router()->define(Method::GET, "/", function () {
-        $view = new HtmlView(
-            Path::template("main.php"),
-            [
-                "foo" => 10,
-                "bar" => "baz"
-            ]
-        );
-        $view->render();
+        return new HtmlView(Path::template("main.php"), [
+            "title" => "Projekt Lista",
+            "projects" => ProjectFactory::createMore(3)
+        ]);
+    });
+
+    Client::router()->define(Method::GET, "/projekt", function () {
+        return new HtmlView(Path::template("projekt.php"), [
+            //"title" => "Projekt Létrehozása",
+            "project" => ProjectFactory::createOne()
+        ]);
     });
 
     Client::router()->define(Method::GET, "/api", function () {
-        $view = new JsonView([
+        return new JsonView([
             "foo" => "bar",
-            "baz" => 10
+            "baz" => 10,
+            "test" => new DateTime(),
+            "project" => ProjectFactory::createMore(10)
         ]);
-        $view->render();
     });
 
     Client::execute(

@@ -13,6 +13,14 @@ class Path
         static::$basePath = $path;
     }
 
+    public static function absolute(string $path): string
+    {
+        return implode(DIRECTORY_SEPARATOR, [
+            static::$basePath,
+            $path
+        ]);
+    }
+
     public static function template(string $path): string
     {
         return implode(DIRECTORY_SEPARATOR, [

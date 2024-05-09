@@ -1,0 +1,25 @@
+:root
+{
+    --bs-body-color: var(--bs-gray-700);
+}
+
+.bg-dark
+{
+    background-color: var(--bs-gray-800) !important;
+}
+
+.list-group
+{
+    --bs-list-group-item-padding-x: 1.25rem;
+    --bs-list-group-item-padding-y: 0.75rem;
+}
+
+.card
+{
+    --bs-card-title-spacer-y: 0.15rem;
+}
+
+.card .list-group .card-body p
+{
+    margin-bottom: 1.4rem;
+}

@@ -2,7 +2,7 @@
 
 namespace PamutProba\App\View;
 
-use PamutProba\App\Input;
+use PamutProba\App\Input\Input;
 
 abstract class View
 {

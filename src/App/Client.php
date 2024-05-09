@@ -2,6 +2,10 @@
 
 namespace PamutProba\App;
 
+use PamutProba\App\Input\HeaderTransformer;
+use PamutProba\App\Input\Input;
+use PamutProba\App\View\HtmlView;
+use PamutProba\Exception\Exception;
 use PamutProba\Http\Method;
 use PamutProba\Http\Status;
 use PamutProba\Utility\Path;
@@ -15,7 +19,11 @@ class Client
 
     public static function create(array $headers, array $params, array $body): void
     {
-        static::$request = new Request($headers, $params, $body);
+        static::$request = new Request(
+            new Input($headers, new HeaderTransformer()),
+            new Input($params),
+            new Input($body)
+        );
         static::$router = new Router();
     }
 
@@ -34,13 +42,22 @@ class Client
      */
     public static function execute(Method $method, string $endpoint): void
     {
-        static::router()->execute($method, $endpoint);
+        $view = static::router()->execute($method, $endpoint);
+        ob_start();
+        $view->render();
+        ob_end_flush();
+        exit();
     }
 
     public static function exitWithError(\Exception $error, Status $code = Status::InternalServerError): void
     {
+        ob_end_clean();
         http_response_code($code->value);
-        require Path::template("error.php");
+        $view = new HtmlView(Path::template("error.php"), [
+            "title" => "Hiba",
+            "error" => Exception::from($error)
+        ]);
+        $view->render();
         exit();
     }
 }

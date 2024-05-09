@@ -1,22 +1,21 @@
 <?php
 /**
- * @var Exception $error
+ * @var HtmlView $this
  */
+
+use PamutProba\App\View\HtmlView;
+use PamutProba\Utility\Development\Development;
+use PamutProba\Utility\Path;
+
 ?>
-<!doctype html>
-<html lang="hu">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <title>Pamutlabor Teszt Feladat</title>
-</head>
-<body>
-<h1 class="text-3xl font-bold underline">
-    Error!
-</h1>
-<p>
-    <?php echo $error->getMessage(); ?>
-</p>
-</body>
-</html>
+<?php require Path::template("./components/header.php") ?>
+
+<div class="container my-3">
+    <h1>Hiba történt!</h1>
+    <div class="bg-body-tertiary p-3">
+        <?php echo $this->data->get("error")->getMessage() ?>.
+        <?php Development::printTrace($this->data->get("error")->getTrace()); ?>
+    </div>
+</div>
+
+<?php require Path::template("./components/footer.php") ?>

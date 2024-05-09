@@ -4,7 +4,7 @@ namespace PamutProba\Exception;
 
 use PamutProba\Http\Status;
 
-class HttpException extends \Exception
+class HttpException extends Exception
 {
     public function __construct(
         string $message = "",
