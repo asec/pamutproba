@@ -2,11 +2,12 @@
 
 namespace PamutProba\App\View;
 
+use PamutProba\Http\MimeType;
+
 class JsonView extends View
 {
     public function render(): void
     {
-        header("Content-Type: application/json");
         echo json_encode($this->data->all());
     }
 }

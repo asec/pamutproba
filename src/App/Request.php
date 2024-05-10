@@ -4,7 +4,7 @@ namespace PamutProba\App;
 
 use PamutProba\App\Input\Input;
 
-class Request
+readonly class Request
 {
     public function __construct(
         protected Input $headers,
@@ -13,12 +13,24 @@ class Request
     )
     {}
 
+    public static function from(array $headers, array $params, array $body): static
+    {
+        return new static(
+            new Input($headers),
+            new Input($params),
+            new Input($body)
+        );
+    }
+
     public function headers(): Input
     {
         return $this->headers;
     }
 
-    public function getHeader(string $key): null|string
+    /**
+     * @throws \Exception
+     */
+    public function getHeader(string $key): mixed
     {
         return $this->headers()->get($key);
     }
@@ -28,6 +40,9 @@ class Request
         return $this->params;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function getParam(string $key): null|string
     {
         return $this->params()->get($key);
@@ -38,6 +53,9 @@ class Request
         return $this->body;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function getField(string $key): null|string
     {
         return $this->body()->get($key);

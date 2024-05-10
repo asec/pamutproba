@@ -14,4 +14,9 @@ class HttpException extends Exception
     {
         parent::__construct($message, $code->value, $previous);
     }
+
+    public static function from(\Exception $e): static
+    {
+        return new static($e->getMessage(), Status::InternalServerError);
+    }
 }

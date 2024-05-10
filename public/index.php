@@ -2,13 +2,20 @@
 
 require_once "../src/autoload.php";
 
-use PamutProba\App\Client;
+use PamutProba\App\Client\Client;
+use PamutProba\App\Client\Middleware\HeaderNormalizeRequestUri;
+use PamutProba\App\Client\Middleware\HeaderParseAccept;
+use PamutProba\App\Client\Middleware\JsonBodyParser;
 use PamutProba\App\Config;
+use PamutProba\App\Request;
+use PamutProba\App\Router\RouteHandler\HtmlRouteHandler;
+use PamutProba\App\Router\RouteHandler\JsonRouteHandler;
 use PamutProba\App\View\HtmlView;
 use PamutProba\App\View\JsonView;
 use PamutProba\Entity\Factory\ProjectFactory;
 use PamutProba\Exception\HttpException;
 use PamutProba\Http\Method;
+use PamutProba\Http\MimeType;
 use PamutProba\Http\Status;
 use PamutProba\Utility\Development\Development;
 use PamutProba\Utility\Development\DevelopmentService;
@@ -29,24 +36,34 @@ try
         Config::get("APP_ENV") === "dev" ? new DevelopmentService() : new VoidDevelopmentService()
     );
 
-    Client::create($_SERVER, $_GET, $_POST);
-    $request = Client::request();
+    Client::use(
+        new HeaderNormalizeRequestUri(),
+        new HeaderParseAccept(),
+        new JsonBodyParser()
+    );
+    Client::create(
+        Request::from($_SERVER, $_GET, $_POST),
+        [
+            "api" => new JsonRouteHandler(MimeType::Json),
+            "web" => new HtmlRouteHandler(MimeType::Any)
+        ]
+    );
 
-    Client::router()->define(Method::GET, "/", function () {
+    Client::router("web")->define(Method::GET, "/", function () {
         return new HtmlView(Path::template("main.php"), [
             "title" => "Projekt Lista",
             "projects" => ProjectFactory::createMore(3)
         ]);
     });
 
-    Client::router()->define(Method::GET, "/projekt", function () {
+    Client::router("web")->define(Method::GET, "/projekt", function () {
         return new HtmlView(Path::template("projekt.php"), [
-            //"title" => "Projekt Létrehozása",
+            "title" => "Projekt Létrehozása",
             "project" => ProjectFactory::createOne()
         ]);
     });
 
-    Client::router()->define(Method::GET, "/api", function () {
+    Client::router("api")->define(Method::GET, "/api", function () {
         return new JsonView([
             "foo" => "bar",
             "baz" => 10,
@@ -55,16 +72,22 @@ try
         ]);
     });
 
-    Client::execute(
-        Method::tryFrom($request->getHeader("REQUEST_METHOD")),
-        $request->getHeader("REQUEST_URI")
-    );
+    Client::router("api")->define(Method::POST, "/api", function () {
+        return new JsonView([
+            "headers" => Client::request()->headers()->all(),
+            "params" => Client::request()->params()->all(),
+            "body" => Client::request()->body()->all(),
+            "success" => true
+        ]);
+    });
+
+    Client::execute();
 }
 catch (HttpException $e)
 {
     Client::exitWithError($e, Status::from($e->getCode()));
 }
-catch (Exception $e)
+catch (\Exception $e)
 {
     Client::exitWithError($e);
 }

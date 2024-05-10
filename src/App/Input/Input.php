@@ -2,31 +2,31 @@
 
 namespace PamutProba\App\Input;
 
-class Input
+readonly class Input
 {
+
+
     public function __construct(
-        protected array $data,
-        Transformer $transformer = null
+        protected array $data
     )
-    {
-        if ($transformer !== null)
-        {
-            $transformer($this->data);
-        }
-    }
+    {}
 
     /**
      * @throws \Exception
      */
     public function get(string $key): mixed
     {
-        if (!array_key_exists($key, $this->data))
+        if (!$this->has($key))
         {
-            throw new \Exception("Hiányzó kulcs az adatszerkezetben: [{$key}]");
-            //return null;
+            throw new \Exception("Missing key in the structure: [{$key}]");
         }
 
         return $this->data[$key];
+    }
+
+    public function has(string $key): bool
+    {
+        return isset($this->data[$key]);
     }
 
     public function all(): array

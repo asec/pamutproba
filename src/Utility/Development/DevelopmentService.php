@@ -45,6 +45,10 @@ class DevelopmentService implements IDevelopmentService
                     {
                         $arg = get_class($arg);
                     }
+                    else if (is_array($arg))
+                    {
+                        $arg = "Array";
+                    }
                     $args[] = $arg;
                 }
                 echo "{$error["function"]}(" . implode(", ", $args) . ")";

@@ -2,8 +2,6 @@
 
 namespace PamutProba\Utility;
 
-use PamutProba\App\Client;
-
 class Url
 {
     protected static string $base;

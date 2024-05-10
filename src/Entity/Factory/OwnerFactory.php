@@ -2,7 +2,6 @@
 
 namespace PamutProba\Entity\Factory;
 
-use PamutProba\Entity\Entity;
 use PamutProba\Entity\Owner;
 
 class OwnerFactory extends EntityFactory

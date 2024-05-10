@@ -2,6 +2,8 @@
 
 namespace PamutProba\App\View;
 
+use PamutProba\Http\MimeType;
+
 class HtmlView extends View
 {
     protected string $template;
@@ -15,7 +17,6 @@ class HtmlView extends View
     public function render(): void
     {
         $data = &$this->data;
-        header("Content-Type: text/html; charset=utf-8");
         require $this->template;
     }
 }
