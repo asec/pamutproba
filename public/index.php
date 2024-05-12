@@ -12,7 +12,13 @@ use PamutProba\App\Router\RouteHandler\HtmlRouteHandler;
 use PamutProba\App\Router\RouteHandler\JsonRouteHandler;
 use PamutProba\App\View\HtmlView;
 use PamutProba\App\View\JsonView;
+use PamutProba\Database\Database;
+use PamutProba\Database\MySQL\PDO\DatabaseService;
 use PamutProba\Entity\Factory\ProjectFactory;
+use PamutProba\Entity\Model\Model;
+use PamutProba\Entity\Model\OwnerModel;
+use PamutProba\Entity\Model\ProjectModel;
+use PamutProba\Entity\Model\StatusModel;
 use PamutProba\Exception\HttpException;
 use PamutProba\Http\Method;
 use PamutProba\Http\MimeType;
@@ -21,6 +27,7 @@ use PamutProba\Utility\Development\Development;
 use PamutProba\Utility\Development\DevelopmentService;
 use PamutProba\Utility\Development\VoidDevelopmentService;
 use PamutProba\Utility\Path;
+use PamutProba\Utility\Url;
 
 Path::setBase(__DIR__ . DIRECTORY_SEPARATOR . "..");
 
@@ -35,6 +42,14 @@ try
     Development::setEnvironment(
         Config::get("APP_ENV") === "dev" ? new DevelopmentService() : new VoidDevelopmentService()
     );
+    Database::set(new DatabaseService(
+        Config::get("MYSQL")["HOST"],
+        Config::get("MYSQL")["PORT"],
+        Config::get("MYSQL")["USER"],
+        Config::get("MYSQL")["PASSWORD"],
+        Config::get("MYSQL")["DATABASE"]
+    ));
+    Model::setDb(Database::get());
 
     Client::use(
         new HeaderNormalizeRequestUri(),
@@ -50,17 +65,44 @@ try
     );
 
     Client::router("web")->define(Method::GET, "/", function () {
+
         return new HtmlView(Path::template("main.php"), [
             "title" => "Projekt Lista",
-            "projects" => ProjectFactory::createMore(3)
+            "projects" => ProjectModel::list()
         ]);
+
     });
 
     Client::router("web")->define(Method::GET, "/projekt", function () {
+
+        $project = null;
+        if ($id = (int) Client::request()->getParam("id"))
+        {
+            $project = ProjectModel::get($id);
+            if ($project === null)
+            {
+                throw new HttpException("A keresett oldal nem található.", Status::NotFound);
+            }
+        }
+
         return new HtmlView(Path::template("projekt.php"), [
             "title" => "Projekt Létrehozása",
-            "project" => ProjectFactory::createOne()
+            "project" => $project,
+            "statuses" => StatusModel::list()
         ]);
+
+    });
+
+    Client::router("web")->define(Method::POST, "/projekt", function () {
+        $id = (int) Client::request()->getField("id");
+        $status = StatusModel::get((int) Client::request()->getField("status"));
+        $owner = OwnerModel::getBy("email", Client::request()->getField("owner_email"));
+        if ($status === null)
+        {
+            // TODO: Hiba jelzés
+            Client::redirect(Url::current() . "/?id=$id");
+        }
+        var_dump(Client::request()->body()->all()); die();
     });
 
     Client::router("api")->define(Method::GET, "/api", function () {

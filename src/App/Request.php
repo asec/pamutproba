@@ -27,12 +27,9 @@ readonly class Request
         return $this->headers;
     }
 
-    /**
-     * @throws \Exception
-     */
     public function getHeader(string $key): mixed
     {
-        return $this->headers()->get($key);
+        return $this->headers()->has($key) ? $this->headers()->get($key) : null;
     }
 
     public function params(): Input
@@ -40,12 +37,9 @@ readonly class Request
         return $this->params;
     }
 
-    /**
-     * @throws \Exception
-     */
     public function getParam(string $key): null|string
     {
-        return $this->params()->get($key);
+        return $this->params()->has($key) ? $this->params()->get($key) : null;
     }
 
     public function body(): Input
@@ -53,11 +47,8 @@ readonly class Request
         return $this->body;
     }
 
-    /**
-     * @throws \Exception
-     */
     public function getField(string $key): null|string
     {
-        return $this->body()->get($key);
+        return $this->body()->has($key) ? $this->body()->get($key) : null;
     }
 }

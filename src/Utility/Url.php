@@ -2,6 +2,8 @@
 
 namespace PamutProba\Utility;
 
+use PamutProba\App\Client\Client;
+
 class Url
 {
     protected static string $base;
@@ -17,6 +19,11 @@ class Url
                 $_SERVER["HTTP_HOST"]
             ]);
         }
-        return static::$base . ($url ?? "");
+        return static::$base . ($url ?? "/");
+    }
+
+    public static function current(): string
+    {
+        return static::base(Client::request()->getHeader("REQUEST_URI"));
     }
 }

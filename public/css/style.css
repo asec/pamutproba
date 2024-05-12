@@ -1,11 +1,11 @@
-:root
-{
-    --bs-body-color: var(--bs-gray-700);
-}
-
 .bg-dark
 {
     background-color: var(--bs-gray-800) !important;
+}
+
+.container.text-lighter
+{
+    --bs-body-color: var(--bs-gray-700);
 }
 
 .list-group
@@ -22,4 +22,9 @@
 .card .list-group .card-body p
 {
     margin-bottom: 1.4rem;
+}
+
+.form-control
+{
+    --bs-border-color: var(--bs-gray-400);
 }

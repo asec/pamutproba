@@ -10,6 +10,15 @@ class Status extends Entity
         public string $name
     ){}
 
+    /*public static function from(array $data): static
+    {
+        return new static(
+            $data["id"],
+            $data["key"],
+            $data["name"]
+        );
+    }*/
+
     public static function random(): Status
     {
         return new Status(
