@@ -33,12 +33,12 @@ readonly class Router
     }
 
     /**
-     * @param MimeType[] $mimes
+     * @param MimeType[]|null $mimes
      * @param Method $method
      * @param string $endpoint
      * @return RouteHandler|null
      */
-    public function selectRouteHandler(array $mimes, Method $method, string $endpoint): RouteHandler|null
+    public function selectRouteHandler(?array $mimes, Method $method, string $endpoint): RouteHandler|null
     {
         return $this->selectByMimeAndRoute($mimes, $method, $endpoint)
             ?? $this->selectByRoute($method, $endpoint)
@@ -48,13 +48,17 @@ readonly class Router
     }
 
     /**
-     * @param MimeType[] $mimes
+     * @param MimeType[]|null $mimes
      * @param Method $method
      * @param string $endpoint
      * @return RouteHandler|null
      */
-    protected function selectByMimeAndRoute(array $mimes, Method $method, string $endpoint): RouteHandler|null
+    protected function selectByMimeAndRoute(?array $mimes, Method $method, string $endpoint): RouteHandler|null
     {
+        if ($mimes === null)
+        {
+            return null;
+        }
         foreach ($this->handlers as $handler)
         {
             if ($handler->isFor($mimes) && $handler->has($method, $endpoint))
@@ -80,11 +84,15 @@ readonly class Router
     }
 
     /**
-     * @param MimeType[] $mimes
+     * @param MimeType[]|null $mimes
      * @return RouteHandler|null
      */
-    protected function selectByMime(array $mimes): RouteHandler|null
+    protected function selectByMime(?array $mimes): RouteHandler|null
     {
+        if ($mimes === null)
+        {
+            return null;
+        }
         foreach ($this->handlers as $handler)
         {
             if ($handler->isFor($mimes))

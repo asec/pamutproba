@@ -2,18 +2,29 @@
 
 namespace PamutProba\Entity\Model;
 
-use PamutProba\Database\DatabaseEntityType;
 use PamutProba\Entity\Entity;
+use PamutProba\Entity\Model\Validation\Id;
+use PamutProba\Entity\Model\Validation\IsProject;
+use PamutProba\Entity\Model\Validation\StringLength;
+use PamutProba\Entity\Model\Validation\ValidEntity;
 use PamutProba\Entity\Owner;
 use PamutProba\Entity\Project;
 use PamutProba\Entity\Status;
 
 class ProjectModel extends Model
 {
-    protected static string $entityType = Project::class;
-    protected static DatabaseEntityType $dbEntityType = DatabaseEntityType::Project;
+    protected function validators(): array
+    {
+        return [
+            "id" => [new IsProject(), new Id($this)],
+            "title" => [new StringLength(3, 150)],
+            "description" => [new StringLength(1, 1000)],
+            "status" => [new ValidEntity(Status::class)],
+            "owner" => [new ValidEntity(Owner::class)]
+        ];
+    }
 
-    protected static function groupRawData(array $data): array
+    protected function groupRawData(array $data): array
     {
         $projectData = [];
         $statusData = [];
@@ -44,35 +55,40 @@ class ProjectModel extends Model
     /**
      * @param int $start
      * @param int $limit
-     * @return Entity[]
+     * @return Project[]
      * @throws \Exception
      */
-    public static function list(int $start = 0, int $limit = 10): array
+    public function list(int $start = 0, int $limit = 0): array
     {
-        $rawData = static::db()->entity(static::$dbEntityType)->list($start, $limit);
+        $store = $this->store();
+        if ($this->filterType !== null)
+        {
+            $store->filterByRelation($this->filterType, $this->filterValue->id);
+        }
+        $rawData = $store->list($start, $limit);
         $result = [];
         foreach ($rawData as $data)
         {
             list($projectData, $statusData, $ownerData) = static::groupRawData($data);
-            $projectData["status"] = Status::from($statusData);
-            $projectData["owner"] = Owner::from($ownerData);
+            $projectData["status"] = $statusData;
+            $projectData["owner"] = $ownerData;
             $result[] = Project::from($projectData);
         }
 
         return $result;
     }
 
-    public static function get(int $id): Entity|null
+    public function get(int $id): Project|null
     {
-        $rawData = static::db()->entity(static::$dbEntityType)->get($id);
+        $rawData = $this->store()->get($id);
         if ($rawData === false)
         {
             return null;
         }
 
         list($projectData, $statusData, $ownerData) = static::groupRawData($rawData);
-        $projectData["status"] = Status::from($statusData);
-        $projectData["owner"] = Owner::from($ownerData);
+        $projectData["status"] = $statusData;
+        $projectData["owner"] = $ownerData;
 
         return Project::from($projectData);
     }

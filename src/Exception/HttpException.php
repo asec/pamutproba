@@ -6,17 +6,17 @@ use PamutProba\Http\Status;
 
 class HttpException extends Exception
 {
-    public function __construct(
+    public static function with(
         string $message = "",
-        Status $code = Status::InternalServerError,
+        Status $status = Status::InternalServerError,
         ?\Throwable $previous = null
-    )
+    ): static
     {
-        parent::__construct($message, $code->value, $previous);
+        return new static($message, $status->value, $previous);
     }
 
     public static function from(\Exception $e): static
     {
-        return new static($e->getMessage(), Status::InternalServerError);
+        return static::with($e->getMessage(), Status::InternalServerError);
     }
 }

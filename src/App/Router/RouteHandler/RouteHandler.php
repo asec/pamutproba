@@ -2,6 +2,7 @@
 
 namespace PamutProba\App\Router\RouteHandler;
 
+use PamutProba\App\Controller\IController;
 use PamutProba\App\View\View;
 use PamutProba\Exception\HttpException;
 use PamutProba\Http\Method;
@@ -21,10 +22,10 @@ abstract class RouteHandler
     /**
      * @param Method $method
      * @param string $endpoint
-     * @param \Closure(): View $action
+     * @param (\Closure(): View)|IController $action
      * @throws \Exception
      */
-    public function define(Method $method, string $endpoint, \Closure $action): void
+    public function define(Method $method, string $endpoint, \Closure|IController $action): void
     {
         if (!array_key_exists($method->value, $this->routes))
         {
@@ -63,7 +64,7 @@ abstract class RouteHandler
     {
         if (!$this->has($method, $endpoint))
         {
-            throw new HttpException("Undefined route [{$method->name} {$endpoint}]", Status::NotFound);
+            throw HttpException::with("Undefined route [{$method->name} {$endpoint}]", Status::NotFound);
         }
 
         $view = $this->routes[$method->value][$endpoint]();
@@ -80,15 +81,8 @@ abstract class RouteHandler
 
     public function setHeaders(): void
     {
-        switch ($this->mime)
-        {
-            case MimeType::Json:
-                header("Content-Type: " . MimeType::Json->value);
-                break;
-            default:
-                header("Content-Type: " . MimeType::Html->value . "; charset=utf-8");
-                break;
-        }
+        header("Cache-Control: no-cache");
+        header("Content-Type: {$this->mime->contentType()}");
     }
 
     public abstract function createErrorPage(\Exception $error): View;

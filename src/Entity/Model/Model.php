@@ -3,69 +3,113 @@
 namespace PamutProba\Entity\Model;
 
 use PamutProba\Database\DatabaseEntityType;
+use PamutProba\Database\IDatabaseEntity;
 use PamutProba\Database\IDatabaseService;
 use PamutProba\Entity\Entity;
+use PamutProba\Entity\Model\Validation\IValidator;
+use PamutProba\Exception\ValidationException;
 
-abstract class Model
+abstract class Model implements IModel
 {
-    protected static string $entityType = Entity::class;
-    protected static DatabaseEntityType $dbEntityType;
-    private static ?IDatabaseService $db = null;
+    protected ?DatabaseEntityType $filterType = null;
+    protected ?Entity $filterValue = null;
 
-    public static function setDb(IDatabaseService $db): void
+    public function __construct(
+        protected string $entityType,
+        protected DatabaseEntityType $databaseEntityType,
+        protected IDatabaseService $store
+    )
+    {}
+
+    protected function store(): IDatabaseEntity
     {
-        static::$db = $db;
+        return $this->store->entity($this->databaseEntityType);
+    }
+
+    public function type(): string
+    {
+        return $this->entityType;
     }
 
     /**
-     * @throws \Exception
+     * @return array<string, IValidator[]>
      */
-    protected static function db(): IDatabaseService
+    protected function validators(): array
     {
-        if (static::$db === null)
+        return [];
+    }
+
+    /**
+     * @param Entity $entity
+     * @return void
+     * @throws ValidationException
+     */
+    public function validate(Entity $entity): void
+    {
+        foreach ($this->validators() as $field => $validators)
         {
-            throw new \Exception("You need to set a database service for the models first");
+            foreach ($validators as $validator)
+            {
+                $validator($field, $entity);
+            }
         }
-        return static::$db;
     }
 
-    /**
-     * @throws \Exception
-     */
-    public static function count(): int
+    public function filterByRelation(DatabaseEntityType $databaseEntityType, Entity $entity): IModel
     {
-        return static::db()->entity(static::$dbEntityType)->count();
+        $this->filterType = $databaseEntityType;
+        $this->filterValue = $entity;
+
+        return $this;
     }
 
-    /**
-     * @param int $start
-     * @param int $limit
-     * @return Entity[]
-     */
-    public static abstract function list(int $start = 0, int $limit = 10): array;
-
-    /**
-     * @throws \Exception
-     */
-    public static function get(int $id): Entity|null
+    public function count(): int
     {
-        $data = static::db()->entity(static::$dbEntityType)->get($id);
+        $store = $this->store();
+        if ($this->filterType)
+        {
+            $store->filterByRelation($this->filterType, $this->filterValue->id);
+        }
+        return $store->count();
+    }
+
+    public abstract function list(int $start = 0, int $limit = 0): array;
+
+    public function get(int $id): Entity|null
+    {
+        $data = $this->store()->get($id);
         if ($data === false)
         {
             return null;
         }
 
-        return call_user_func(array(static::$entityType, "from"), $data);
+        return call_user_func(array($this->entityType, "from"), $data);
     }
 
-    public static function getBy(string $field, mixed $value): Entity|null
+    public function getBy(string $field, mixed $value): Entity|null
     {
-        $data = static::db()->entity(static::$dbEntityType)->getBy($field, $value);
+        $data = $this->store()->getBy($field, $value);
         if ($data === false)
         {
             return null;
         }
 
-        return call_user_func(array(static::$entityType, "from"), $data);
+        return call_user_func(array($this->entityType, "from"), $data);
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    public function save(Entity $entity): Entity
+    {
+        $this->validate($entity);
+        $data = $this->store()->save($entity->toArray());
+
+        return call_user_func(array($this->entityType, "from"), $data);
+    }
+
+    public function delete(Entity $entity): void
+    {
+        $this->store()->delete($entity->id);
     }
 }

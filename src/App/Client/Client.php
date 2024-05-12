@@ -6,6 +6,7 @@ use PamutProba\App\Client\Middleware\Middleware;
 use PamutProba\App\Request;
 use PamutProba\App\Router\RouteHandler\RouteHandler;
 use PamutProba\App\Router\Router;
+use PamutProba\App\Session;
 use PamutProba\Http\Method;
 use PamutProba\Http\Status;
 
@@ -13,6 +14,7 @@ class Client
 {
     protected static bool $isCreated = false;
     protected static Request $request;
+    protected static Session $session;
     protected static Router $router;
     /**
      * @var Middleware[]
@@ -23,17 +25,19 @@ class Client
 
     /**
      * @param Request $request
+     * @param Session $session
      * @param array<string, RouteHandler> $routeHandlers
      * @return void
      * @throws \Exception
      */
-    public static function create(Request $request, array $routeHandlers): void
+    public static function create(Request $request, Session $session, array $routeHandlers): void
     {
         if (static::$isCreated)
         {
             throw new \Exception("The Client has already been created");
         }
         static::$request = $request;
+        static::$session = $session;
         static::$router = new Router($routeHandlers);
 
         if (count($routeHandlers) === 0)
@@ -71,6 +75,11 @@ class Client
     public static function request(): Request
     {
         return static::$request;
+    }
+
+    public static function session(): Session
+    {
+        return static::$session;
     }
 
     /**

@@ -2,12 +2,12 @@
 
 namespace PamutProba\App;
 
-use PamutProba\App\Input\Input;
+use PamutProba\App\Input\ImmutableInput;
 use PamutProba\Utility\Path;
 
 class Config
 {
-    protected static ?Input $data = null;
+    protected static ?ImmutableInput $data = null;
     protected static array $filesToCheck = [
         ".env.php",
         ".env.local.php"
@@ -24,7 +24,7 @@ class Config
                 $data = array_merge($data, require $file);
             }
         }
-        static::$data = new Input($data);
+        static::$data = new ImmutableInput($data);
     }
 
     /**

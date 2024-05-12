@@ -28,3 +28,8 @@
 {
     --bs-border-color: var(--bs-gray-400);
 }
+
+.mw-200
+{
+    max-width: 200px;
+}

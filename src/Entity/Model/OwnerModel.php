@@ -2,20 +2,26 @@
 
 namespace PamutProba\Entity\Model;
 
-use PamutProba\Database\DatabaseEntityType;
+use PamutProba\Entity\Model\Validation\Id;
+use PamutProba\Entity\Model\Validation\IsEmail;
+use PamutProba\Entity\Model\Validation\IsOwner;
+use PamutProba\Entity\Model\Validation\StringLength;
 use PamutProba\Entity\Owner;
 
 class OwnerModel extends Model
 {
-    protected static string $entityType = Owner::class;
-    protected static DatabaseEntityType $dbEntityType = DatabaseEntityType::Owner;
-
-    /**
-     * @throws \Exception
-     */
-    public static function list(int $start = 0, int $limit = 10): array
+    protected function validators(): array
     {
-        $rawData = static::db()->entity(static::$dbEntityType)->list($start, $limit);
+        return [
+            "id" => [new IsOwner(), new Id($this)],
+            "name" => [new StringLength(3, 150)],
+            "email" => [new StringLength(3, 150), new IsEmail()]
+        ];
+    }
+
+    public function list(int $start = 0, int $limit = 0): array
+    {
+        $rawData = $this->store()->list($start, $limit);
 
         $result = [];
         foreach ($rawData as $data)
@@ -24,5 +30,16 @@ class OwnerModel extends Model
         }
 
         return $result;
+    }
+
+    public function get(int $id): Owner|null
+    {
+        $data = $this->store()->get($id);
+        if ($data === false)
+        {
+            return null;
+        }
+
+        return call_user_func(array($this->entityType, "from"), $data);
     }
 }

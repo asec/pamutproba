@@ -2,53 +2,80 @@
 
 namespace PamutProba\App;
 
-use PamutProba\App\Input\Input;
+use PamutProba\App\Input\ImmutableInput;
 
 readonly class Request
 {
     public function __construct(
-        protected Input $headers,
-        protected Input $params,
-        protected Input $body
+        protected ImmutableInput $headers,
+        protected ImmutableInput $params,
+        protected ImmutableInput $body
     )
     {}
 
     public static function from(array $headers, array $params, array $body): static
     {
         return new static(
-            new Input($headers),
-            new Input($params),
-            new Input($body)
+            new ImmutableInput($headers),
+            new ImmutableInput($params),
+            new ImmutableInput($body)
         );
     }
 
-    public function headers(): Input
+    public function headers(): ImmutableInput
     {
         return $this->headers;
     }
 
     public function getHeader(string $key): mixed
     {
-        return $this->headers()->has($key) ? $this->headers()->get($key) : null;
+        try
+        {
+            $value = $this->headers->get($key);
+        }
+        catch (\Exception $e)
+        {
+            $value = null;
+        }
+
+        return $value;
     }
 
-    public function params(): Input
+    public function params(): ImmutableInput
     {
         return $this->params;
     }
 
     public function getParam(string $key): null|string
     {
-        return $this->params()->has($key) ? $this->params()->get($key) : null;
+        try
+        {
+            $value = $this->params->get($key);
+        }
+        catch (\Exception $e)
+        {
+            $value = null;
+        }
+
+        return $value;
     }
 
-    public function body(): Input
+    public function body(): ImmutableInput
     {
         return $this->body;
     }
 
     public function getField(string $key): null|string
     {
-        return $this->body()->has($key) ? $this->body()->get($key) : null;
+        try
+        {
+            $value = $this->body->get($key);
+        }
+        catch (\Exception $e)
+        {
+            $value = null;
+        }
+
+        return $value;
     }
 }

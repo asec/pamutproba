@@ -2,14 +2,23 @@
 
 namespace PamutProba\Entity\Model;
 
-use PamutProba\Database\DatabaseEntityType;
 use PamutProba\Entity\Entity;
+use PamutProba\Entity\Model\Validation\Id;
+use PamutProba\Entity\Model\Validation\IsStatus;
+use PamutProba\Entity\Model\Validation\NotNull;
+use PamutProba\Entity\Model\Validation\StringLength;
 use PamutProba\Entity\Status;
 
 class StatusModel extends Model
 {
-    protected static string $entityType = Status::class;
-    protected static DatabaseEntityType $dbEntityType = DatabaseEntityType::Status;
+    protected function validators(): array
+    {
+        return [
+            "id" => [new IsStatus(), new NotNull(), new Id($this)],
+            "key" => [new StringLength(1, 45)],
+            "name" => [new StringLength(3, 45)]
+        ];
+    }
 
     /**
      * @param int $start
@@ -17,9 +26,9 @@ class StatusModel extends Model
      * @return Entity[]
      * @throws \Exception
      */
-    public static function list(int $start = 0, int $limit = 10): array
+    public function list(int $start = 0, int $limit = 0): array
     {
-        $rawData = static::db()->entity(static::$dbEntityType)->list($start, $limit);
+        $rawData = $this->store()->list($start, $limit);
 
         $result = [];
         foreach ($rawData as $data)

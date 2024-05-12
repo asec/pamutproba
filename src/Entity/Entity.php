@@ -9,5 +9,10 @@ abstract class Entity
         return new static(...$data);
     }
 
+    public function toArray(): array
+    {
+        return json_decode(json_encode($this), true);
+    }
+
     public static abstract function random(): Entity;
 }

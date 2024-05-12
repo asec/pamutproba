@@ -14,6 +14,9 @@ $project = $this->data->has("project") ? $this->data->get("project") : null;
 <?php require Path::template("./components/header.php") ?>
 
 <div class="container my-3">
+
+    <?php require Path::template("./components/messages.php") ?>
+
     <form method="post" action="<?php echo Url::current() ?>">
         <div class="mb-3">
             <label for="title" class="form-label">Cím</label>

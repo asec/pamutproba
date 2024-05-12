@@ -2,11 +2,15 @@
 
 namespace PamutProba\Database\MySQL\PDO\Entity;
 
+use PamutProba\Database\DatabaseEntityType;
+use PamutProba\Database\IDatabaseEntity;
 use PamutProba\Database\IDatabaseService;
 use PamutProba\Database\MySQL\MySQLDatabaseEntity;
 
 abstract class DatabaseEntity extends MySQLDatabaseEntity
 {
+    protected array $filter = [];
+
     public function __construct(
         private readonly IDatabaseService $service
     )
@@ -17,10 +21,42 @@ abstract class DatabaseEntity extends MySQLDatabaseEntity
         return $this->service;
     }
 
+    protected function dbo(): \PDO
+    {
+        return $this->service()->dbo();
+    }
+
+    public function relation(DatabaseEntityType $entityType): null|string
+    {
+        return null;
+    }
+
+    public function filterByRelation(DatabaseEntityType $entityType, int $id): IDatabaseEntity
+    {
+        $relation = $this->relation($entityType);
+        if ($relation)
+        {
+            $this->filter[] = [
+                "relation" => $entityType,
+                "id" => $id
+            ];
+        }
+
+        return $this;
+    }
+
+    protected function createWhereClause(): array
+    {
+        return [];
+    }
+
+    protected function bindWhereClause(\PDOStatement $statement): void
+    {}
+
     public function count(): int
     {
-        $query = "SELECT COUNT(*) FROM `{$this->table()}`";
-        $statement = $this->service()->dbo()->prepare($query);
+        $query = "SELECT COUNT(*) FROM `{$this->table()}` {$this->appendWhere()}";
+        $statement = $this->dbo()->prepare($query);
         $statement->execute();
 
         return $statement->fetchColumn();
@@ -29,7 +65,7 @@ abstract class DatabaseEntity extends MySQLDatabaseEntity
     public function get(int $id): array|false
     {
         $query = "SELECT * FROM `{$this->table()}` WHERE `id` = :id";
-        $statement = $this->service()->dbo()->prepare($query);
+        $statement = $this->dbo()->prepare($query);
         $statement->bindValue("id", $id);
         $statement->execute();
 
@@ -39,19 +75,59 @@ abstract class DatabaseEntity extends MySQLDatabaseEntity
     public function getBy(string $field, mixed $value): array|false
     {
         $query = "SELECT * FROM `{$this->table()}` WHERE `$field` = :value";
-        $statement = $this->service()->dbo()->prepare($query);
+        $statement = $this->dbo()->prepare($query);
         $statement->bindValue("value", $value);
         $statement->execute();
 
         return $statement->fetch();
     }
 
+    protected function appendLimit(int $start, int $limit): string
+    {
+        $result = [];
+
+        if ($limit > 0)
+        {
+            $result[] = $start >= 0 ? "$start" : "0";
+            $result[] = "$limit";
+        }
+
+        return $result ? "LIMIT " . implode(", ", $result) : "";
+    }
+
+    protected function appendWhere(): string
+    {
+        $whereClause = $this->createWhereClause();
+        return $whereClause ? "WHERE " . implode(" AND ", $whereClause) : "";
+    }
+
     public function list(int $start, int $limit): array
     {
-        $query = "SELECT * FROM `{$this->table()}` ORDER BY `id` ASC LIMIT $start, $limit";
-        $statement = $this->service()->dbo()->prepare($query);
+        $query = "SELECT * FROM `{$this->table()}` ORDER BY `id` ASC {$this->appendLimit($start, $limit)}";
+        $statement = $this->dbo()->prepare($query);
         $statement->execute();
 
         return $statement->fetchAll();
+    }
+
+    public function save(array $properties): array
+    {
+        if (!$properties["id"] || $this->get((int) $properties["id"]) === false)
+        {
+            return $this->insert($properties);
+        }
+
+        return $this->update($properties);
+    }
+
+    protected abstract function insert(array $properties): array;
+    protected abstract function update(array $properties): array;
+
+    public function delete(int $id): void
+    {
+        $query = "DELETE FROM `{$this->table()}` WHERE `id` = :id";
+        $statement = $this->dbo()->prepare($query);
+        $statement->bindValue("id", $id);
+        $statement->execute();
     }
 }

@@ -6,6 +6,7 @@
 use PamutProba\App\View\HtmlView;
 use PamutProba\Utility\Url;
 
+$currentProjectId = $this->data->has("project") ? $this->data->get("project")->id : null;
 ?>
 <header>
     <nav class="navbar navbar-expand-lg bg-dark" data-bs-theme="dark">
@@ -20,8 +21,14 @@ use PamutProba\Utility\Url;
                         <a href="<?php echo Url::base() ?>" class="nav-link<?php echo Url::current() === Url::base() ? " active" : "" ?>">Projektlista</a>
                     </li>
                     <li class="nav-item">
-                        <a href="<?php echo Url::base("/projekt") ?>" class="nav-link<?php echo Url::current() === Url::base("/projekt") ? " active" : "" ?>">
-                            <?php if ($this->data->has("project") && $this->data->get("project")): ?>
+                        <a
+                            href="<?php echo Url::base(
+                                "/projekt" .
+                                ($currentProjectId  ? "/?id=$currentProjectId" : "")
+                            ) ?>"
+                            class="nav-link<?php echo Url::current() === Url::base("/projekt") ? " active" : "" ?>"
+                        >
+                            <?php if ($currentProjectId): ?>
                             Szerkesztés
                             <?php else: ?>
                             Létrehozás

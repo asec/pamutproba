@@ -23,10 +23,13 @@ class DevelopmentService implements IDevelopmentService
         {
             $index++;
             echo '<li class="list-group-item">';
-            echo "<div><small>{$error["file"]} (Sor: {$error["line"]})</small></div>";
+            if (isset($error["file"]))
+            {
+                echo "<div><small>{$error["file"]} (Sor: {$error["line"]})</small></div>";
+            }
             if (isset($error["function"]))
             {
-                echo '<a class="badge text-bg-light text-decoration-none" data-bs-toggle="collapse" href="#stack-trace-' . $index . '">';
+                echo '<a class="badge text-bg-light text-decoration-none text-break text-wrap text-start" data-bs-toggle="collapse" href="#stack-trace-' . $index . '">';
                 echo $error["class"] ?? "";
                 echo $error["type"] ?? "";
                 $args = [];
@@ -48,6 +51,10 @@ class DevelopmentService implements IDevelopmentService
                     else if (is_array($arg))
                     {
                         $arg = "Array";
+                    }
+                    else if (is_null($arg))
+                    {
+                        $arg = "null";
                     }
                     $args[] = $arg;
                 }

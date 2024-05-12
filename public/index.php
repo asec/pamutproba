@@ -7,27 +7,34 @@ use PamutProba\App\Client\Middleware\HeaderNormalizeRequestUri;
 use PamutProba\App\Client\Middleware\HeaderParseAccept;
 use PamutProba\App\Client\Middleware\JsonBodyParser;
 use PamutProba\App\Config;
+use PamutProba\App\Controller\Api\ApiHomeController;
+use PamutProba\App\Controller\Api\ApiHomePostController;
+use PamutProba\App\Controller\Dev\DevRandomController;
+use PamutProba\App\Controller\Web\WebHomeController;
+use PamutProba\App\Controller\Web\WebProjektController;
+use PamutProba\App\Controller\Web\WebProjektDeleteController;
+use PamutProba\App\Controller\Web\WebProjektSaveController;
 use PamutProba\App\Request;
 use PamutProba\App\Router\RouteHandler\HtmlRouteHandler;
 use PamutProba\App\Router\RouteHandler\JsonRouteHandler;
-use PamutProba\App\View\HtmlView;
-use PamutProba\App\View\JsonView;
+use PamutProba\App\Session;
 use PamutProba\Database\Database;
+use PamutProba\Database\DatabaseEntityType;
 use PamutProba\Database\MySQL\PDO\DatabaseService;
-use PamutProba\Entity\Factory\ProjectFactory;
-use PamutProba\Entity\Model\Model;
+use PamutProba\Entity\Model\Models;
 use PamutProba\Entity\Model\OwnerModel;
 use PamutProba\Entity\Model\ProjectModel;
 use PamutProba\Entity\Model\StatusModel;
+use PamutProba\Entity\Owner;
+use PamutProba\Entity\Project;
+use PamutProba\Entity\Status;
 use PamutProba\Exception\HttpException;
 use PamutProba\Http\Method;
 use PamutProba\Http\MimeType;
-use PamutProba\Http\Status;
 use PamutProba\Utility\Development\Development;
 use PamutProba\Utility\Development\DevelopmentService;
 use PamutProba\Utility\Development\VoidDevelopmentService;
 use PamutProba\Utility\Path;
-use PamutProba\Utility\Url;
 
 Path::setBase(__DIR__ . DIRECTORY_SEPARATOR . "..");
 
@@ -49,7 +56,25 @@ try
         Config::get("MYSQL")["PASSWORD"],
         Config::get("MYSQL")["DATABASE"]
     ));
-    Model::setDb(Database::get());
+
+    Models::setStore(Database::get());
+    Models::create(
+        Owner::class,
+        DatabaseEntityType::Owner,
+        OwnerModel::class
+    );
+    Models::create(
+        Status::class,
+        DatabaseEntityType::Status,
+        StatusModel::class
+    );
+    Models::create(
+        Project::class,
+        DatabaseEntityType::Project,
+        ProjectModel::class
+    );
+
+    Session::start();
 
     Client::use(
         new HeaderNormalizeRequestUri(),
@@ -58,76 +83,88 @@ try
     );
     Client::create(
         Request::from($_SERVER, $_GET, $_POST),
+        Session::from($_SESSION),
         [
             "api" => new JsonRouteHandler(MimeType::Json),
             "web" => new HtmlRouteHandler(MimeType::Any)
         ]
     );
 
-    Client::router("web")->define(Method::GET, "/", function () {
+    Client::router("web")->define(
+        Method::GET,
+        "/",
+        new WebHomeController(
+            Client::request(),
+            Models::get(Project::class),
+            Models::get(Status::class)
+        )
+    );
 
-        return new HtmlView(Path::template("main.php"), [
-            "title" => "Projekt Lista",
-            "projects" => ProjectModel::list()
-        ]);
+    Client::router("web")->define(
+        Method::GET,
+        "/projekt",
+        new WebProjektController(
+            Client::request(),
+            Client::session(),
+            Models::get(Project::class),
+            Models::get(Status::class)
+        )
+    );
 
-    });
+    Client::router("web")->define(
+        Method::POST,
+        "/projekt",
+        new WebProjektSaveController(
+            Client::request(),
+            Client::session(),
+            Models::get(Status::class),
+            Models::get(Owner::class),
+            Models::get(Project::class)
+        )
+    );
 
-    Client::router("web")->define(Method::GET, "/projekt", function () {
+    Client::router("web")->define(
+        Method::POST,
+        "/projekt/torol",
+        new WebProjektDeleteController(
+            Client::request(),
+            Client::session(),
+            Models::get(Project::class)
+        )
+    );
 
-        $project = null;
-        if ($id = (int) Client::request()->getParam("id"))
-        {
-            $project = ProjectModel::get($id);
-            if ($project === null)
-            {
-                throw new HttpException("A keresett oldal nem található.", Status::NotFound);
-            }
-        }
+    Client::router("api")->define(
+        Method::GET,
+        "/api",
+        new ApiHomeController()
+    );
 
-        return new HtmlView(Path::template("projekt.php"), [
-            "title" => "Projekt Létrehozása",
-            "project" => $project,
-            "statuses" => StatusModel::list()
-        ]);
+    Client::router("api")->define(
+        Method::POST,
+        "/api",
+        new ApiHomePostController(Client::request())
+    );
 
-    });
-
-    Client::router("web")->define(Method::POST, "/projekt", function () {
-        $id = (int) Client::request()->getField("id");
-        $status = StatusModel::get((int) Client::request()->getField("status"));
-        $owner = OwnerModel::getBy("email", Client::request()->getField("owner_email"));
-        if ($status === null)
-        {
-            // TODO: Hiba jelzés
-            Client::redirect(Url::current() . "/?id=$id");
-        }
-        var_dump(Client::request()->body()->all()); die();
-    });
-
-    Client::router("api")->define(Method::GET, "/api", function () {
-        return new JsonView([
-            "foo" => "bar",
-            "baz" => 10,
-            "test" => new DateTime(),
-            "project" => ProjectFactory::createMore(10)
-        ]);
-    });
-
-    Client::router("api")->define(Method::POST, "/api", function () {
-        return new JsonView([
-            "headers" => Client::request()->headers()->all(),
-            "params" => Client::request()->params()->all(),
-            "body" => Client::request()->body()->all(),
-            "success" => true
-        ]);
-    });
+    if (Development::isDev())
+    {
+        Client::router("web")->define(
+            Method::GET,
+            "/dev/random",
+            new DevRandomController(
+                Client::request(),
+                Client::session(),
+                Models::get(Project::class),
+                Models::get(Status::class),
+                Models::get(Owner::class)
+            )
+        );
+    }
 
     Client::execute();
 }
 catch (HttpException $e)
 {
-    Client::exitWithError($e, Status::from($e->getCode()));
+    Client::exitWithError($e, \PamutProba\Http\Status::from($e->getCode()));
 }
 catch (\Exception $e)
 {

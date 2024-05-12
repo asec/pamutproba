@@ -22,8 +22,24 @@ class Url
         return static::$base . ($url ?? "/");
     }
 
-    public static function current(): string
+    public static function current(array $params = []): string
     {
-        return static::base(Client::request()->getHeader("REQUEST_URI"));
+        $url = static::base(Client::request()->getHeader("REQUEST_URI"));
+        if ($params)
+        {
+            foreach ($params as $key => $param)
+            {
+                if ($param === "")
+                {
+                    unset($params[$key]);
+                }
+            }
+            $query = http_build_query($params);
+            if ($query)
+            {
+                $url .= "?" . $query;
+            }
+        }
+        return $url;
     }
 }

@@ -20,7 +20,7 @@ class ClassMapper implements IDatabaseEntityClassMapper
             DatabaseEntityType::Project => ProjectDatabaseEntity::class,
             DatabaseEntityType::Owner => OwnerDatabaseEntity::class,
             DatabaseEntityType::Status => StatusDatabaseEntity::class,
-            default => throw new \Exception("The following type needs to be mapped into a class in " . static::class . ": {$entityType->name}")
+            default => throw new \Exception("The following type needs to be mapped into a class in " . static::class . ": $entityType->name")
         };
     }
 }
