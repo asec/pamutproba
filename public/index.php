@@ -3,13 +3,17 @@
 require_once "../src/autoload.php";
 
 use PamutProba\App\Client\Client;
+use PamutProba\App\Client\Middleware\FormUrlencodedBodyParser;
 use PamutProba\App\Client\Middleware\HeaderNormalizeRequestUri;
 use PamutProba\App\Client\Middleware\HeaderParseAccept;
+use PamutProba\App\Client\Middleware\HeaderParseUnique;
 use PamutProba\App\Client\Middleware\JsonBodyParser;
 use PamutProba\App\Config;
 use PamutProba\App\Controller\Api\ApiHomeController;
 use PamutProba\App\Controller\Api\ApiHomePostController;
+use PamutProba\App\Controller\Api\ApiProjektDeleteController;
 use PamutProba\App\Controller\Dev\DevRandomController;
+use PamutProba\App\Controller\Dev\DevWaitController;
 use PamutProba\App\Controller\Web\WebHomeController;
 use PamutProba\App\Controller\Web\WebProjektController;
 use PamutProba\App\Controller\Web\WebProjektDeleteController;
@@ -79,7 +83,9 @@ try
     Client::use(
         new HeaderNormalizeRequestUri(),
         new HeaderParseAccept(),
-        new JsonBodyParser()
+        new HeaderParseUnique(),
+        new JsonBodyParser(),
+        new FormUrlencodedBodyParser()
     );
     Client::create(
         Request::from($_SERVER, $_GET, $_POST),
@@ -134,6 +140,15 @@ try
     );
 
     Client::router("api")->define(
+        Method::DELETE,
+        "/api/projekt",
+        new ApiProjektDeleteController(
+            Client::request(),
+            Models::get(Project::class)
+        )
+    );
+
+    Client::router("api")->define(
         Method::GET,
         "/api",
         new ApiHomeController()
@@ -156,6 +171,14 @@ try
                 Models::get(Project::class),
                 Models::get(Status::class),
                 Models::get(Owner::class)
+            )
+        );
+
+        Client::router("api")->define(
+            Method::GET,
+            "/dev/wait",
+            new DevWaitController(
+                Client::request()
             )
         );
     }

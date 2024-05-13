@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace PamutProba\App\Controller\Dev;
 
@@ -32,6 +32,7 @@ class DevRandomController implements IController
         {
             $statusIndex = array_rand($statuses);
             $ownerIndex = array_rand($owners);
+
             $project = Project::random();
             $project->status = $statuses[$statusIndex];
             $project->owner = $owners[$ownerIndex];

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace PamutProba\App;
 
@@ -46,7 +46,7 @@ readonly class Request
         return $this->params;
     }
 
-    public function getParam(string $key): null|string
+    public function getParam(string $key): mixed
     {
         try
         {
@@ -65,7 +65,7 @@ readonly class Request
         return $this->body;
     }
 
-    public function getField(string $key): null|string
+    public function getField(string $key): mixed
     {
         try
         {

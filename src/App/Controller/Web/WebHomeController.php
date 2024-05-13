@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace PamutProba\App\Controller\Web;
 
@@ -23,6 +23,8 @@ class WebHomeController implements IWebController
     {
         $model = $this->projectModel;
 
+        $partial = $this->request->headers()->has("Pamut-Ajax-Partial");
+
         $status = $this->request->getParam("status") ?? "";
         if ($status)
         {
@@ -43,10 +45,10 @@ class WebHomeController implements IWebController
             $currentPage = min($this->request->getParam("page") ?? 1, $numPages);
         }
 
-        return new HtmlView(Path::template("main.php"), [
+        return new HtmlView(Path::template("main" . ($partial ? ".partial" : "") . ".php"), [
             "title" => "Projekt Lista",
             "projects" => $model->list(
-                $currentPage > 0 ? ($currentPage - 1) * static::$itemsPerPage : 0,
+                $currentPage > 0 ? intval(($currentPage - 1) * static::$itemsPerPage) : 0,
                 static::$itemsPerPage
             ),
             "statuses" => $this->statusModel->list(),

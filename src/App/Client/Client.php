@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace PamutProba\App\Client;
 
@@ -45,6 +45,8 @@ class Client
             throw new \Exception("You must specify at least one route handler for your application.");
         }
 
+        static::applyMiddleware();
+
         static::$isCreated = true;
     }
 
@@ -68,7 +70,7 @@ class Client
         $next = fn(Request $request): Request => $request;
         foreach (static::$middlewares as $middleware)
         {
-            static::$request = $middleware(static::request(), $next);
+            static::$request = $middleware(static::$request, $next);
         }
     }
 
@@ -113,8 +115,6 @@ class Client
      */
     public static function execute(): void
     {
-        static::applyMiddleware();
-
         list($validMimes, $method, $endpoint) = static::getRouteData();
         $routeHandler = static::$router->selectRouteHandler($validMimes, $method, $endpoint);
 

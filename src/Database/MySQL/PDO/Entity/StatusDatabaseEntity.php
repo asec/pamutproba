@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace PamutProba\Database\MySQL\PDO\Entity;
 
@@ -17,7 +17,7 @@ class StatusDatabaseEntity extends DatabaseEntity
         $statement->bindValue("name", $properties["name"]);
         $statement->execute();
 
-        $id = $this->dbo()->lastInsertId();
+        $id = (int) $this->dbo()->lastInsertId();
         $properties["id"] = $id;
 
         return $properties;

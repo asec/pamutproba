@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace PamutProba\Database\MySQL\PDO\Entity;
 
@@ -17,9 +17,8 @@ class OwnerDatabaseEntity extends DatabaseEntity
         $statement->bindValue("email", $properties["email"]);
         $statement->execute();
 
-        $id = $this->dbo()->lastInsertId();
+        $id = (int) $this->dbo()->lastInsertId();
         $properties["id"] = $id;
-
 
         return $properties;
     }

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace PamutProba\App\Controller\Web;
 
@@ -23,10 +23,10 @@ class WebProjektDeleteController implements IWebController
 
     public function __invoke(): HtmlView
     {
-        $id = $this->request->getField("id");
+        $id = (int) $this->request->getField("id");
         if (!$id)
         {
-            throw new HttpException(
+            throw HttpException::with(
                 "The request is missing the following parameter from it's body: [id]",
                 Status::BadRequest
             );

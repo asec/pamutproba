@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace PamutProba\Database\MySQL\PDO\Entity;
 
@@ -25,8 +25,16 @@ class ProjectDatabaseEntity extends DatabaseEntity
     protected function deconstructProperties(array $properties): array
     {
         $status = $properties["status"];
+        if (isset($status["id"]))
+        {
+            $status["id"] = (int) $status["id"];
+        }
         unset($properties["status"]);
         $owner = $properties["owner"];
+        if (isset($owner["id"]))
+        {
+            $owner["id"] = (int) $owner["id"];
+        }
         unset($properties["owner"]);
 
         return [$properties, $status, $owner];
@@ -158,7 +166,7 @@ class ProjectDatabaseEntity extends DatabaseEntity
             $statement->bindValue("description", $properties["description"]);
             $statement->execute();
 
-            return $this->dbo()->lastInsertId();
+            return (int) $this->dbo()->lastInsertId();
         });
     }
 

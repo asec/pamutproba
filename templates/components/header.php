@@ -17,6 +17,6 @@ use PamutProba\Utility\Url;
     <link rel="stylesheet" href="<?php echo Url::base("/css/bootstrap.min") ?>">
     <link rel="stylesheet" href="<?php echo Url::base("/css/style.css") ?>">
 </head>
-<body>
+<body class="overflow-x-hidden">
 
 <?php require Path::template("./components/menu.php") ?>
