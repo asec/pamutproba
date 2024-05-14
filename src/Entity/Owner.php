@@ -2,6 +2,8 @@
 
 namespace PamutProba\Entity;
 
+use PamutProba\Core\Entity\Entity;
+
 class Owner extends Entity
 {
     public function __construct(

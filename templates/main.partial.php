@@ -3,18 +3,18 @@
  * @var HtmlView $this
  */
 
-use PamutProba\App\View\HtmlView;
+use PamutProba\Core\App\View\HtmlView;
+use PamutProba\Core\Utility\Path;
+use PamutProba\Core\Utility\Url;
 use PamutProba\Entity\Project;
 use PamutProba\Entity\Status;
-use PamutProba\Utility\Path;
-use PamutProba\Utility\Url;
 
 /**
- * @var Project[] $projects
+ * @var \PamutProba\Entity\Project[] $projects
  */
 $projects = $this->data->get("projects");
 /**
- * @var Status[] $statuses
+ * @var \PamutProba\Core\Entity\Status[] $statuses
  */
 $statuses = $this->data->get("statuses");
 $status = $this->data->get("status");

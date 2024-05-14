@@ -2,11 +2,8 @@
 
 namespace PamutProba\Database\MySQL\PDO;
 
+use PamutProba\Core\Database\IDatabaseEntityClassMapper;
 use PamutProba\Database\DatabaseEntityType;
-use PamutProba\Database\IDatabaseEntityClassMapper;
-use PamutProba\Database\MySQL\PDO\Entity\OwnerDatabaseEntity;
-use PamutProba\Database\MySQL\PDO\Entity\ProjectDatabaseEntity;
-use PamutProba\Database\MySQL\PDO\Entity\StatusDatabaseEntity;
 
 class ClassMapper implements IDatabaseEntityClassMapper
 {
@@ -17,9 +14,9 @@ class ClassMapper implements IDatabaseEntityClassMapper
     {
         return match($entityType)
         {
-            DatabaseEntityType::Project => ProjectDatabaseEntity::class,
-            DatabaseEntityType::Owner => OwnerDatabaseEntity::class,
-            DatabaseEntityType::Status => StatusDatabaseEntity::class,
+            DatabaseEntityType::Project => ProjectPdoDatabaseEntity::class,
+            DatabaseEntityType::Owner => OwnerPdoDatabaseEntity::class,
+            DatabaseEntityType::Status => StatusPdoDatabaseEntity::class,
             default => throw new \Exception("The following type needs to be mapped into a class in " . static::class . ": $entityType->name")
         };
     }

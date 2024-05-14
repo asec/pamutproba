@@ -3,8 +3,8 @@
  * @var HtmlView $this
  */
 
-use PamutProba\App\View\HtmlView;
-use PamutProba\Utility\Url;
+use PamutProba\Core\App\View\HtmlView;
+use PamutProba\Core\Utility\Url;
 
 $numPages = (int) $this->data->get("numPages");
 $currentPage = (int) $this->data->get("currentPage");

@@ -57,12 +57,6 @@ class IProcess
     {
         throw MustImplementException.with(this.constructor.name, "trigger");
     }
-
-    /**
-     * @param {Object} message
-     */
-    notify(message)
-    {}
 }
 
 export default IProcess;

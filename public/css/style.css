@@ -32,6 +32,7 @@
 .mw-200
 {
     max-width: 200px;
+    min-width: 100px;
 }
 
 .list-group-item.pamut-loading

@@ -2,6 +2,8 @@
 
 namespace PamutProba\Entity;
 
+use PamutProba\Core\Entity\Entity;
+
 class Project extends Entity
 {
     public function __construct(

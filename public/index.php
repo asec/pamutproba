@@ -2,43 +2,46 @@
 
 require_once "../src/autoload.php";
 
-use PamutProba\App\Client\Client;
-use PamutProba\App\Client\Middleware\FormUrlencodedBodyParser;
-use PamutProba\App\Client\Middleware\HeaderNormalizeRequestUri;
-use PamutProba\App\Client\Middleware\HeaderParseAccept;
-use PamutProba\App\Client\Middleware\HeaderParseUnique;
-use PamutProba\App\Client\Middleware\JsonBodyParser;
-use PamutProba\App\Config;
-use PamutProba\App\Controller\Api\ApiHomeController;
-use PamutProba\App\Controller\Api\ApiHomePostController;
-use PamutProba\App\Controller\Api\ApiProjektDeleteController;
-use PamutProba\App\Controller\Dev\DevRandomController;
-use PamutProba\App\Controller\Dev\DevWaitController;
-use PamutProba\App\Controller\Web\WebHomeController;
-use PamutProba\App\Controller\Web\WebProjektController;
-use PamutProba\App\Controller\Web\WebProjektDeleteController;
-use PamutProba\App\Controller\Web\WebProjektSaveController;
-use PamutProba\App\Request;
-use PamutProba\App\Router\RouteHandler\HtmlRouteHandler;
-use PamutProba\App\Router\RouteHandler\JsonRouteHandler;
-use PamutProba\App\Session;
-use PamutProba\Database\Database;
+use PamutProba\Controller\Api\ApiProjektDeleteController;
+use PamutProba\Controller\Dev\DevRandomController;
+use PamutProba\Controller\Dev\DevWaitController;
+use PamutProba\Controller\Web\WebHomeController;
+use PamutProba\Controller\Web\WebProjektController;
+use PamutProba\Controller\Web\WebProjektDeleteController;
+use PamutProba\Controller\Web\WebProjektSaveController;
+use PamutProba\Core\App\Client\Client;
+use PamutProba\Core\App\Client\Middleware\FormUrlencodedBodyParser;
+use PamutProba\Core\App\Client\Middleware\HeaderNormalizeRequestUri;
+use PamutProba\Core\App\Client\Middleware\HeaderParseAccept;
+use PamutProba\Core\App\Client\Middleware\HeaderParseUnique;
+use PamutProba\Core\App\Client\Middleware\JsonBodyParser;
+use PamutProba\Core\App\Config;
+use PamutProba\Core\App\Environment;
+use PamutProba\Core\App\Request;
+use PamutProba\Core\App\Router\RouteHandler\HtmlRouteHandler;
+use PamutProba\Core\App\Router\RouteHandler\JsonRouteHandler;
+use PamutProba\Core\App\Session;
+use PamutProba\Core\Database\Database;
+use PamutProba\Core\Database\MySQL\PDO\PdoDatabaseService;
+use PamutProba\Core\Exception\HttpException;
+use PamutProba\Core\Http\Method;
+use PamutProba\Core\Http\MimeType;
+use PamutProba\Core\Mail\Mail;
+use PamutProba\Core\Mail\MailServiceDriver;
+use PamutProba\Core\Mail\Services\SimpleMailService;
+use PamutProba\Core\Mail\Services\VoidMailService;
+use PamutProba\Core\Model\Model;
+use PamutProba\Core\Utility\Development\Development;
+use PamutProba\Core\Utility\Development\DevelopmentService;
+use PamutProba\Core\Utility\Development\VoidDevelopmentService;
+use PamutProba\Core\Utility\Path;
 use PamutProba\Database\DatabaseEntityType;
-use PamutProba\Database\MySQL\PDO\DatabaseService;
-use PamutProba\Entity\Model\Models;
-use PamutProba\Entity\Model\OwnerModel;
-use PamutProba\Entity\Model\ProjectModel;
-use PamutProba\Entity\Model\StatusModel;
 use PamutProba\Entity\Owner;
 use PamutProba\Entity\Project;
 use PamutProba\Entity\Status;
-use PamutProba\Exception\HttpException;
-use PamutProba\Http\Method;
-use PamutProba\Http\MimeType;
-use PamutProba\Utility\Development\Development;
-use PamutProba\Utility\Development\DevelopmentService;
-use PamutProba\Utility\Development\VoidDevelopmentService;
-use PamutProba\Utility\Path;
+use PamutProba\Factory\OwnerFactory;
+use PamutProba\Factory\ProjectFactory;
+use PamutProba\Factory\StatusFactory;
 
 Path::setBase(__DIR__ . DIRECTORY_SEPARATOR . "..");
 
@@ -51,32 +54,29 @@ set_error_handler(/**
 try
 {
     Development::setEnvironment(
-        Config::get("APP_ENV") === "dev" ? new DevelopmentService() : new VoidDevelopmentService()
+        Config::get("APP_ENV") === Environment::Development
+            ? new DevelopmentService()
+            : new VoidDevelopmentService()
     );
-    Database::set(new DatabaseService(
+    Database::set(new PdoDatabaseService(
         Config::get("MYSQL")["HOST"],
         Config::get("MYSQL")["PORT"],
         Config::get("MYSQL")["USER"],
         Config::get("MYSQL")["PASSWORD"],
         Config::get("MYSQL")["DATABASE"]
     ));
+    Mail::set(
+        match (Config::get("MAIL")["DRIVER"])
+        {
+            MailServiceDriver::Null => new VoidMailService(Config::get("MAIL")["FROM"]),
+            MailServiceDriver::SimpleMail => new SimpleMailService(Config::get("MAIL")["FROM"])
+        }
+    );
 
-    Models::setStore(Database::get());
-    Models::create(
-        Owner::class,
-        DatabaseEntityType::Owner,
-        OwnerModel::class
-    );
-    Models::create(
-        Status::class,
-        DatabaseEntityType::Status,
-        StatusModel::class
-    );
-    Models::create(
-        Project::class,
-        DatabaseEntityType::Project,
-        ProjectModel::class
-    );
+    Model::setDefaultStore(Database::get());
+    Model::bind(Owner::class, DatabaseEntityType::Owner, OwnerFactory::validators());
+    Model::bind(Status::class, DatabaseEntityType::Status, StatusFactory::validators());
+    Model::bind(Project::class, DatabaseEntityType::Project, ProjectFactory::validators());
 
     Session::start();
 
@@ -101,8 +101,8 @@ try
         "/",
         new WebHomeController(
             Client::request(),
-            Models::get(Project::class),
-            Models::get(Status::class)
+            new ProjectFactory(),
+            new StatusFactory()
         )
     );
 
@@ -112,8 +112,8 @@ try
         new WebProjektController(
             Client::request(),
             Client::session(),
-            Models::get(Project::class),
-            Models::get(Status::class)
+            new ProjectFactory(),
+            new StatusFactory()
         )
     );
 
@@ -123,9 +123,10 @@ try
         new WebProjektSaveController(
             Client::request(),
             Client::session(),
-            Models::get(Status::class),
-            Models::get(Owner::class),
-            Models::get(Project::class)
+            new StatusFactory(),
+            new OwnerFactory(),
+            new ProjectFactory(),
+            Mail::get()
         )
     );
 
@@ -135,7 +136,7 @@ try
         new WebProjektDeleteController(
             Client::request(),
             Client::session(),
-            Models::get(Project::class)
+            new ProjectFactory()
         )
     );
 
@@ -144,20 +145,8 @@ try
         "/api/projekt",
         new ApiProjektDeleteController(
             Client::request(),
-            Models::get(Project::class)
+            new ProjectFactory()
         )
-    );
-
-    Client::router("api")->define(
-        Method::GET,
-        "/api",
-        new ApiHomeController()
-    );
-
-    Client::router("api")->define(
-        Method::POST,
-        "/api",
-        new ApiHomePostController(Client::request())
     );
 
     if (Development::isDev())
@@ -168,9 +157,9 @@ try
             new DevRandomController(
                 Client::request(),
                 Client::session(),
-                Models::get(Project::class),
-                Models::get(Status::class),
-                Models::get(Owner::class)
+                new ProjectFactory(),
+                new StatusFactory(),
+                new OwnerFactory()
             )
         );
 
@@ -187,7 +176,7 @@ try
 }
 catch (HttpException $e)
 {
-    Client::exitWithError($e, \PamutProba\Http\Status::from($e->getCode()));
+    Client::exitWithError($e, \PamutProba\Core\Http\Status::from($e->getCode()));
 }
 catch (\Exception $e)
 {

@@ -2,6 +2,8 @@
 
 namespace PamutProba\Entity;
 
+use PamutProba\Core\Entity\Entity;
+
 class Status extends Entity
 {
     public function __construct(

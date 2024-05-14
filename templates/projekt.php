@@ -1,13 +1,13 @@
 <?php
 /**
  * @var HtmlView $this
- * @var Project $project
+ * @var \PamutProba\Core\Entity\Project $project
  */
 
-use PamutProba\App\View\HtmlView;
+use PamutProba\Core\App\View\HtmlView;
+use PamutProba\Core\Utility\Path;
+use PamutProba\Core\Utility\Url;
 use PamutProba\Entity\Project;
-use PamutProba\Utility\Path;
-use PamutProba\Utility\Url;
 
 $project = $this->data->has("project") ? $this->data->get("project") : null;
 ?>

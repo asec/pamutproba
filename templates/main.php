@@ -1,10 +1,10 @@
 <?php
 /**
- * @var HtmlView $this
+ * @var \PamutProba\Core\App\View\HtmlView $this
  */
 
-use PamutProba\App\View\HtmlView;
-use PamutProba\Utility\Path;
+use PamutProba\Core\App\View\HtmlView;
+use PamutProba\Core\Utility\Path;
 
 ?>
 <?php require Path::template("./components/header.php") ?>

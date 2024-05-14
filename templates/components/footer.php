@@ -1,10 +1,10 @@
 <?php
 /**
- * @var HtmlView $this
+ * @var \PamutProba\Core\App\View\HtmlView $this
  */
 
-use PamutProba\App\View\HtmlView;
-use PamutProba\Utility\Url;
+use PamutProba\Core\App\View\HtmlView;
+use PamutProba\Core\Utility\Url;
 
 ?>
     <script type="text/javascript" src="<?php echo Url::base("/js/bootstrap.bundle.js") ?>"></script>

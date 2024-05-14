@@ -1,10 +1,10 @@
 <?php
 /**
- * @var HtmlView $this
+ * @var \PamutProba\Core\App\View\HtmlView $this
  */
 
-use PamutProba\App\Client\Client;
-use PamutProba\App\View\HtmlView;
+use PamutProba\Core\App\Client\Client;
+use PamutProba\Core\App\View\HtmlView;
 
 $success = Client::session()->getFlashed("message-success");
 $error = Client::session()->getFlashed("message-error");
