@@ -6,6 +6,8 @@ use PamutProba\Core\App\Controller\IController;
 use PamutProba\Core\App\Request;
 use PamutProba\Core\App\Session;
 use PamutProba\Core\App\View\RedirectView;
+use PamutProba\Core\Exception\HttpException;
+use PamutProba\Core\Http\Status;
 use PamutProba\Entity\Project;
 use PamutProba\Factory\OwnerFactory;
 use PamutProba\Factory\ProjectFactory;
@@ -25,6 +27,14 @@ class DevRandomController implements IController
     public function __invoke(): RedirectView
     {
         $count = (int) $this->request->getParam("count") ?: 10;
+
+        if ($count < 0 || $count > 1000)
+        {
+            throw HttpException::with(
+                "A 'count' paraméter értéke 1 és 1000 között lehet. Az alapértelmezett 10",
+                Status::BadRequest
+            );
+        }
 
         $statuses = $this->statusFactory->list();
         if (!$statuses)

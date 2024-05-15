@@ -21,7 +21,7 @@ $statusFilter = $this->data->get("statusFilter");
 $currentPage = (int) $this->data->get("currentPage");
 ?>
 <div id="ajax-refresh-target">
-    <div class="d-flex align-items-baseline justify-content-between">
+    <div class="d-flex align-items-baseline justify-content-between overflow-x-hidden">
         <?php if($statusList): ?>
             <form action="<?php echo Url::current() ?>" method="get" class="me-4 my-3 w-100 mw-200">
                 <select name="status" class="form-select mb-3" onchange="this.form.submit()">
@@ -76,5 +76,8 @@ $currentPage = (int) $this->data->get("currentPage");
         </ul>
     </div>
 
-    <?php require Path::template("./components/pagination.php")?>
+    <div class="overflow-x-hidden">
+        <?php require Path::template("./components/pagination.php")?>
+    </div>
+
 </div>
