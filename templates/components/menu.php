@@ -1,9 +1,10 @@
 <?php
 /**
- * @var \PamutProba\Core\App\View\HtmlView $this
+ * @var HtmlView $this
  */
 
 use PamutProba\Core\App\Config;
+use PamutProba\Core\App\View\HtmlView;
 use PamutProba\Core\Utility\Url;
 
 $currentProjectId = $this->data->has("project") ? $this->data->get("project")->id : null;

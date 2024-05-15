@@ -22,7 +22,6 @@ use PamutProba\Core\App\Request;
 use PamutProba\Core\App\Router\RouteHandler\HtmlRouteHandler;
 use PamutProba\Core\App\Router\RouteHandler\JsonRouteHandler;
 use PamutProba\Core\App\Session;
-use PamutProba\Core\Database\Database;
 use PamutProba\Core\Database\DatabaseServiceDriver;
 use PamutProba\Core\Database\MySQL\PDO\PdoDatabaseService;
 use PamutProba\Core\Exception\HttpException;

@@ -1,7 +1,7 @@
 class ProcessManager
 {
     /**
-     * @type {Array<string, IProcess>}
+     * @type {Object.<string, IProcess>}
      */
     #processes = {};
 

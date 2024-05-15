@@ -4,7 +4,7 @@ namespace PamutProba\Core\App\Client\Middleware;
 
 use PamutProba\Core\App\Request;
 
-class HeaderNormalizeRequestUri extends Middleware
+class HeaderNormalizeRequestUri implements IMiddleware
 {
     public function __invoke(Request $request, callable $next): Request
     {

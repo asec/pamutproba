@@ -5,7 +5,7 @@ namespace PamutProba\Core\App\Client\Middleware;
 use PamutProba\Core\App\Request;
 use PamutProba\Core\Http\MimeType;
 
-class HeaderParseAccept extends Middleware
+class HeaderParseAccept implements IMiddleware
 {
     public function __invoke(Request $request, callable $next): Request
     {

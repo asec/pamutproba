@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \PamutProba\Core\App\View\HtmlView $this
+ * @var HtmlView $this
  */
 
 use PamutProba\Core\App\View\HtmlView;

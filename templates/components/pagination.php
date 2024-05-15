@@ -8,7 +8,7 @@ use PamutProba\Core\Utility\Url;
 
 $numPages = (int) $this->data->get("numPages");
 $currentPage = (int) $this->data->get("currentPage");
-$status = $this->data->get("status");
+$statusFilter = $this->data->get("statusFilter");
 
 ?>
 <?php if ($numPages > 1): ?>
@@ -17,7 +17,7 @@ $status = $this->data->get("status");
         <li class="page-item">
             <a
                 class="page-link<?php echo $currentPage === 1 ? " disabled" : "" ?>"
-                href="<?php echo Url::current([ "status" => $status ]) ?>"
+                href="<?php echo Url::current([ "status" => $statusFilter ]) ?>"
             >
                 <span aria-hidden="true">&laquo;</span>
             </a>
@@ -26,7 +26,7 @@ $status = $this->data->get("status");
             <a
                 class="page-link<?php echo $currentPage === 1 ? " disabled" : "" ?>"
                 href="<?php echo Url::current([
-                        "status" => $status,
+                        "status" => $statusFilter,
                         "page" => $currentPage > 2 ? max($currentPage - 1, 1) : null
                     ])
                 ?>"
@@ -40,7 +40,7 @@ $status = $this->data->get("status");
             <a
                 class="page-link<?php echo $currentPage === $i ? " active" : "" ?>"
                 href="<?php echo Url::current([
-                        "status" => $status,
+                        "status" => $statusFilter,
                         "page" => $i > 1 ? $i : null
                     ])
                 ?>"
@@ -55,7 +55,7 @@ $status = $this->data->get("status");
             <a
                 class="page-link<?php echo $currentPage === $numPages ? " disabled" : "" ?>"
                 href="<?php echo Url::current([
-                        "status" => $status,
+                        "status" => $statusFilter,
                         "page" => min($currentPage + 1, $numPages)
                     ])
                 ?>"
@@ -67,7 +67,7 @@ $status = $this->data->get("status");
             <a
                 class="page-link<?php echo $currentPage === $numPages ? " disabled" : "" ?>"
                 href="<?php echo Url::current([
-                        "status" => $status,
+                        "status" => $statusFilter,
                         "page" => $numPages
                     ])
                 ?>"

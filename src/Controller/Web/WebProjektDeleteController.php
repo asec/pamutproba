@@ -31,14 +31,14 @@ class WebProjektDeleteController implements IWebController
                 Status::BadRequest
             );
         }
-        $entity = $this->projectFactory->get($id);
-        if ($entity === null)
+        $project = $this->projectFactory->get($id);
+        if ($project === null)
         {
             $this->session->flash("message-success", static::$messageSuccess);
             return RedirectView::to("/");
         }
 
-        $this->projectFactory->delete($entity);
+        $this->projectFactory->delete($project);
 
         $this->session->flash("message-success", static::$messageSuccess);
         return RedirectView::to("/");

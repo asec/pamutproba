@@ -4,7 +4,7 @@ namespace PamutProba\Core\App\Client\Middleware;
 
 use PamutProba\Core\App\Request;
 
-abstract class Middleware
+interface IMiddleware
 {
-    public abstract function __invoke(Request $request, callable $next): Request;
+    public function __invoke(Request $request, callable $next): Request;
 }

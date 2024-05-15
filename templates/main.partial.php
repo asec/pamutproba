@@ -10,26 +10,26 @@ use PamutProba\Entity\Project;
 use PamutProba\Entity\Status;
 
 /**
- * @var \PamutProba\Entity\Project[] $projects
+ * @var Project[] $projectList
  */
-$projects = $this->data->get("projects");
+$projectList = $this->data->get("projectList");
 /**
- * @var \PamutProba\Core\Entity\Status[] $statuses
+ * @var Status[] $statusList
  */
-$statuses = $this->data->get("statuses");
-$status = $this->data->get("status");
+$statusList = $this->data->get("statusList");
+$statusFilter = $this->data->get("statusFilter");
 $currentPage = (int) $this->data->get("currentPage");
 ?>
 <div id="ajax-refresh-target">
     <div class="d-flex align-items-baseline justify-content-between">
-        <?php if($statuses): ?>
+        <?php if($statusList): ?>
             <form action="<?php echo Url::current() ?>" method="get" class="me-4 my-3 w-100 mw-200">
                 <select name="status" class="form-select mb-3" onchange="this.form.submit()">
                     <option value="">Státusz</option>
-                    <?php foreach ($statuses as $item): ?>
+                    <?php foreach ($statusList as $item): ?>
                         <option
                             value="<?php echo $item->key ?>"
-                            <?php echo $status === $item->key ? ' selected="selected"' : "" ?>
+                            <?php echo $statusFilter === $item->key ? ' selected="selected"' : "" ?>
                         >
                             <?php echo $item->name ?>
                         </option>
@@ -46,7 +46,7 @@ $currentPage = (int) $this->data->get("currentPage");
 
     <div class="card">
         <ul class="list-group list-group-flush">
-            <?php foreach ($projects as $item): ?>
+            <?php foreach ($projectList as $item): ?>
                 <li class="list-group-item card-body" data-pamut-disable="delete">
                     <div class="card-title d-flex justify-content-between">
                         <h5 class="fw-semibold mb-0"><?php echo $item->title ?></h5>

@@ -39,10 +39,8 @@ class DevRandomActionTest extends \PHPUnit\Framework\TestCase
 
         Path::setBase(__DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "..");
         Development::setEnvironment(new VoidDevelopmentService());
-        //Database::set(new InMemoryDatabaseService());
         Mail::set(new VoidMailService("test@localhost"));
 
-        //Model::setDefaultStore(Database::get());
         Model::bind(Owner::class, DatabaseEntityType::Owner, OwnerFactory::validators());
         Model::bind(Status::class, DatabaseEntityType::Status, StatusFactory::validators());
         Model::bind(Project::class, DatabaseEntityType::Project, ProjectFactory::validators());

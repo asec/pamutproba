@@ -1,11 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace PamutProba\Core\App\Client\Middleware;
 
 use PamutProba\Core\App\Request;
 use PamutProba\Core\Http\MimeType;
 
-class FormUrlencodedBodyParser extends Middleware
+class FormUrlencodedBodyParser implements IMiddleware
 {
     /**
      * @throws \Exception

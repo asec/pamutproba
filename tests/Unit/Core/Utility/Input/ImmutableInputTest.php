@@ -13,7 +13,7 @@ final class RealImmutableInput extends ImmutableInput
     }
 }
 
-class ImmutableInputTest extends \PHPUnit\Framework\TestCase
+final class ImmutableInputTest extends \PHPUnit\Framework\TestCase
 {
     public function testFunctionality(): void
     {

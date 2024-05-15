@@ -5,7 +5,6 @@ namespace PamutProba\Core\Validation;
 use PamutProba\Core\Database\IDatabaseService;
 use PamutProba\Core\Entity\Entity;
 use PamutProba\Core\Exception\ValidationException;
-use PamutProba\Core\Model\IModel;
 
 interface IValidator
 {

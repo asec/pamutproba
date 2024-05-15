@@ -1,7 +1,7 @@
 <?php
 /**
  * @var HtmlView $this
- * @var \PamutProba\Core\Entity\Project $project
+ * @var Project|null $project
  */
 
 use PamutProba\Core\App\View\HtmlView;

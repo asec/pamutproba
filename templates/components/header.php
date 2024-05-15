@@ -3,7 +3,10 @@
  * @var HtmlView $this
  */
 
-use PamutProba\Core\App\Config;use PamutProba\Core\App\View\HtmlView;use PamutProba\Core\Utility\Path;use PamutProba\Core\Utility\Url;
+use PamutProba\Core\App\Config;
+use PamutProba\Core\App\View\HtmlView;
+use PamutProba\Core\Utility\Path;
+use PamutProba\Core\Utility\Url;
 
 ?><!doctype html>
 <html lang="hu">

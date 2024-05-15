@@ -5,7 +5,7 @@ namespace PamutProba\Core\App\Client\Middleware;
 use PamutProba\Core\App\Request;
 use PamutProba\Core\Http\MimeType;
 
-class JsonBodyParser extends Middleware
+class JsonBodyParser implements IMiddleware
 {
     /**
      * @throws \Exception

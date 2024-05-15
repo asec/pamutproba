@@ -2,7 +2,7 @@
 
 namespace PamutProba\Core\App\Client;
 
-use PamutProba\Core\App\Client\Middleware\Middleware;
+use PamutProba\Core\App\Client\Middleware\IMiddleware;
 use PamutProba\Core\App\Request;
 use PamutProba\Core\App\Router\RouteHandler\RouteHandler;
 use PamutProba\Core\App\Router\Router;
@@ -16,7 +16,7 @@ class Client implements IClient
     protected Session $session;
     protected Router $router;
     /**
-     * @var Middleware[]
+     * @var IMiddleware[]
      */
     protected array $middlewares = [];
 
@@ -32,7 +32,7 @@ class Client implements IClient
         $this->router = new Router($routeHandlers);
     }
 
-    public function use(Middleware ...$middlewares): void
+    public function use(IMiddleware ...$middlewares): void
     {
         foreach ($middlewares as $middleware)
         {
