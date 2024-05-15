@@ -2,6 +2,7 @@
 
 namespace PamutProba\Core\Validation;
 
+use PamutProba\Core\Database\IDatabaseService;
 use PamutProba\Core\Entity\Entity;
 use PamutProba\Core\Exception\ValidationException;
 use PamutProba\Core\Model\Model;
@@ -13,11 +14,11 @@ class ValidEntity implements IValidator
     )
     {}
 
-    public function __invoke(string $field, Entity $entity): void
+    public function __invoke(string $field, Entity $entity, IDatabaseService $service): void
     {
         try
         {
-            Model::for($this->entityType)->validate($entity->$field);
+            Model::for($this->entityType, $service)->validate($entity->$field);
         }
         catch (ValidationException $e)
         {

@@ -1,7 +1,7 @@
-import IProcess from "./IProcess";
-import $ from "../jquery";
-import Api from "../Api/Api";
-import {MessageType} from "../Message/Message";
+import IProcess from "./IProcess.js";
+import $ from "../jquery.js";
+import Api from "../Api/Api.js";
+import {MessageType} from "../Message/Message.js";
 
 /**
  * @enum {string}
@@ -131,6 +131,7 @@ class DeleteProject extends IProcess
     /**
      * @param element
      * @param {number} animationLength
+     * @return Promise<void>
      */
     async destroyElement(element, animationLength = 250)
     {

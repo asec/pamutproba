@@ -1,7 +1,7 @@
-import Message, {MessageType} from "./Message/Message";
-import ProcessManager from "./Process/ProcessManager";
-import DeleteProject, {DeleteProjectEvents} from "./Process/DeleteProject";
-import RefreshView, {RefreshViewEvents} from "./Process/RefreshView";
+import Message, {MessageType} from "./Message/Message.js";
+import ProcessManager from "./Process/ProcessManager.js";
+import DeleteProject, {DeleteProjectEvents} from "./Process/DeleteProject.js";
+import RefreshView, {RefreshViewEvents} from "./Process/RefreshView.js";
 
 class App
 {

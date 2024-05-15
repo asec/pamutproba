@@ -2,3 +2,4 @@
 .phpunit.cache
 devel
 logs
+.env.local.php

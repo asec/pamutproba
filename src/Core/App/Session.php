@@ -25,19 +25,14 @@ class Session
     {
         $this->flashKey = "flashed";
         $this->data = $data;
-        try
+
+        $flashed = $this->data->getCopy($this->flashKey) ?? [];
+        if (is_string($flashed))
         {
-            $flashed = $this->data->getCopy($this->flashKey) ?? [];
-            if (is_string($flashed))
-            {
-                $flashed = unserialize($flashed);
-            }
-        }
-        catch (\Exception $e)
-        {
-            $flashed = [];
+            $flashed = unserialize($flashed);
         }
         $this->flashed = new MutableInput($flashed);
+
         $this->clearFlash();
     }
 
@@ -46,6 +41,9 @@ class Session
         return new static(new MutableInput($data));
     }
 
+    /**
+     * @throws \Exception
+     */
     public function set(string $key, mixed $value): void
     {
         if ($key === $this->flashKey)
@@ -74,6 +72,9 @@ class Session
         return $value;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function delete(string $key): bool
     {
         if ($key === $this->flashKey)

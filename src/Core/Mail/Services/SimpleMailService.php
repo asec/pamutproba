@@ -2,7 +2,9 @@
 
 namespace PamutProba\Core\Mail\Services;
 
-class SimpleMailService implements \PamutProba\Core\Mail\IMailService
+use PamutProba\Core\Mail\IMailService;
+
+class SimpleMailService implements IMailService
 {
     /**
      * @var array<string, string>

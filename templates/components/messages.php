@@ -1,13 +1,12 @@
 <?php
 /**
- * @var \PamutProba\Core\App\View\HtmlView $this
+ * @var HtmlView $this
  */
 
-use PamutProba\Core\App\Client\Client;
 use PamutProba\Core\App\View\HtmlView;
 
-$success = Client::session()->getFlashed("message-success");
-$error = Client::session()->getFlashed("message-error");
+$success = $this->data->get("message-success");
+$error = $this->data->get("message-error");
 
 ?>
 <div id="messages">

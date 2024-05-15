@@ -9,13 +9,12 @@ use PamutProba\Core\Http\MimeType;
 class Router
 {
     /**
-     * @var array<string, \PamutProba\Core\App\Router\RouteHandler\RouteHandler>
+     * @var array<string, RouteHandler>
      */
     protected array $handlers;
 
     /**
-     * @param array<string, \PamutProba\Core\App\Router\RouteHandler\RouteHandler> $handlers
-     * @throws \Exception
+     * @param array<string, RouteHandler> $handlers
      */
     public function __construct(array $handlers)
     {
@@ -36,7 +35,7 @@ class Router
      * @param MimeType[]|null $mimes
      * @param Method $method
      * @param string $endpoint
-     * @return \PamutProba\Core\App\Router\RouteHandler\RouteHandler|null
+     * @return RouteHandler|null
      */
     public function selectRouteHandler(?array $mimes, Method $method, string $endpoint): RouteHandler|null
     {
@@ -48,7 +47,7 @@ class Router
     }
 
     /**
-     * @param \PamutProba\Core\Http\MimeType[]|null $mimes
+     * @param MimeType[]|null $mimes
      * @param Method $method
      * @param string $endpoint
      * @return RouteHandler|null

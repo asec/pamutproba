@@ -1,5 +1,5 @@
-import MustImplementException from "../Exception/MustImplementException";
-import {MessageType} from "../Message/Message";
+import MustImplementException from "../Exception/MustImplementException.js";
+import {MessageType} from "../Message/Message.js";
 
 class IProcess
 {

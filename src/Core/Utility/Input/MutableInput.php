@@ -30,6 +30,10 @@ class MutableInput extends ImmutableInput
 
     public function getCopy(string $key): mixed
     {
+        if (!$this->has($key))
+        {
+            return null;
+        }
         return unserialize(serialize($this->data[$key]));
     }
 }

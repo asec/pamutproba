@@ -2,12 +2,13 @@
 
 namespace PamutProba\Core\Validation;
 
+use PamutProba\Core\Database\IDatabaseService;
 use PamutProba\Core\Entity\Entity;
 use PamutProba\Core\Exception\ValidationException;
 
 class IsEmail implements IValidator
 {
-    public function __invoke(string $field, Entity $entity): void
+    public function __invoke(string $field, Entity $entity, IDatabaseService $service): void
     {
         if (!filter_var($entity->$field, FILTER_VALIDATE_EMAIL))
         {

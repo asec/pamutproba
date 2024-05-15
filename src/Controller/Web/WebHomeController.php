@@ -4,10 +4,10 @@ namespace PamutProba\Controller\Web;
 
 use PamutProba\Core\App\Controller\IWebController;
 use PamutProba\Core\App\Request;
+use PamutProba\Core\App\Session;
 use PamutProba\Core\App\View\HtmlView;
 use PamutProba\Core\Utility\Path;
 use PamutProba\Database\DatabaseEntityType;
-use PamutProba\Entity\Project;
 use PamutProba\Entity\Status;
 use PamutProba\Factory\ProjectFactory;
 use PamutProba\Factory\StatusFactory;
@@ -18,6 +18,7 @@ class WebHomeController implements IWebController
 
     public function __construct(
         protected Request        $request,
+        protected Session        $session,
         protected ProjectFactory $projectFactory,
         protected StatusFactory  $statusFactory
     )
@@ -58,7 +59,9 @@ class WebHomeController implements IWebController
             "statuses" => $this->statusFactory->list(),
             "status" => $status,
             "numPages" => $numPages,
-            "currentPage" => $currentPage
+            "currentPage" => $currentPage,
+            "message-success" => $this->session->getFlashed("message-success") ?? "",
+            "message-error" => $this->session->getFlashed("message-error") ?? ""
         ]);
     }
 }

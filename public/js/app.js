@@ -1,5 +1,5 @@
-import $ from "./src/jquery";
-import App from "./src/App";
+import $ from "./src/jquery.js";
+import App from "./src/App.js";
 
 (function () {
     $.noConflict();

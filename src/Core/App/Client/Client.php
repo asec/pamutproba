@@ -10,101 +10,70 @@ use PamutProba\Core\App\Session;
 use PamutProba\Core\Http\Method;
 use PamutProba\Core\Http\Status;
 
-class Client
+class Client implements IClient
 {
-    protected static bool $isCreated = false;
-    protected static Request $request;
-    protected static Session $session;
-    protected static Router $router;
+    protected Request $request;
+    protected Session $session;
+    protected Router $router;
     /**
-     * @var \PamutProba\Core\App\Client\Middleware\Middleware[]
+     * @var Middleware[]
      */
-    protected static array $middlewares = [];
-
-    private function __construct(){}
+    protected array $middlewares = [];
 
     /**
      * @param Request $request
      * @param Session $session
-     * @param array<string, \PamutProba\Core\App\Router\RouteHandler\RouteHandler> $routeHandlers
-     * @return void
-     * @throws \Exception
+     * @param array<string, RouteHandler> $routeHandlers
      */
-    public static function create(Request $request, Session $session, array $routeHandlers): void
+    public function __construct(Request $request, Session $session, array $routeHandlers)
     {
-        if (static::$isCreated)
-        {
-            throw new \Exception("The Client has already been created");
-        }
-        static::$request = $request;
-        static::$session = $session;
-        static::$router = new Router($routeHandlers);
-
-        if (count($routeHandlers) === 0)
-        {
-            throw new \Exception("You must specify at least one route handler for your application.");
-        }
-
-        static::applyMiddleware();
-
-        static::$isCreated = true;
+        $this->request = $request;
+        $this->session = $session;
+        $this->router = new Router($routeHandlers);
     }
 
-    /**
-     * @throws \Exception
-     */
-    public static function use(Middleware ...$middlewares): void
+    public function use(Middleware ...$middlewares): void
     {
-        if (static::$isCreated)
-        {
-            throw new \Exception("Can't attach more middleware to the Client because it has already been created");
-        }
         foreach ($middlewares as $middleware)
         {
-            static::$middlewares[] = $middleware;
+            $this->middlewares[] = $middleware;
         }
     }
 
-    protected static function applyMiddleware(): void
+    public function applyMiddleware(): void
     {
         $next = fn(Request $request): Request => $request;
-        foreach (static::$middlewares as $middleware)
+        foreach ($this->middlewares as $middleware)
         {
-            static::$request = $middleware(static::$request, $next);
+            $this->request = $middleware($this->request, $next);
         }
     }
 
-    public static function request(): Request
+    public function request(): Request
     {
-        return static::$request;
+        return $this->request;
     }
 
-    public static function session(): Session
+    public function session(): Session
     {
-        return static::$session;
+        return $this->session;
     }
 
-    /**
-     * @throws \Exception
-     */
-    public static function router(string $key): RouteHandler
+    public function router(string $key): RouteHandler
     {
-        return static::$router->get($key);
+        return $this->router->get($key);
     }
 
-    /**
-     * @throws \Exception
-     */
-    protected static function getRouteData(): array
+    protected function getRouteData(): array
     {
         return [
-            static::request()->getHeader("APP_ACCEPT"),
-            Method::tryFrom(static::request()->getHeader("REQUEST_METHOD")),
-            static::request()->getHeader("REQUEST_URI")
+            $this->request()->getHeader("APP_ACCEPT") ?? [],
+            Method::tryFrom($this->request()->getHeader("REQUEST_METHOD") ?? "GET"),
+            $this->request()->getHeader("REQUEST_URI") ?? "/"
         ];
     }
 
-    public static function redirect(string $url)
+    public function redirect(string $url): void
     {
         header("Location: $url");
         exit();
@@ -113,30 +82,32 @@ class Client
     /**
      * @throws \Exception
      */
-    public static function execute(): void
+    public function execute(): string
     {
         list($validMimes, $method, $endpoint) = static::getRouteData();
-        $routeHandler = static::$router->selectRouteHandler($validMimes, $method, $endpoint);
+        $routeHandler = $this->router->selectRouteHandler($validMimes, $method, $endpoint);
 
         $view = $routeHandler->execute($method, $endpoint);
         $routeHandler->setHeaders();
-        echo $view->render();
-        exit();
+        return $view->render();
     }
 
-    public static function exitWithError(\Exception $error, Status $code = Status::InternalServerError): void
+    public function exitWithError(\Exception $error, Status $code = Status::InternalServerError): void
     {
+        list($validMimes, $method, $endpoint) = static::getRouteData();
         try
         {
-            list($validMimes, $method, $endpoint) = static::getRouteData();
-            $routeHandler = static::$router->selectRouteHandler($validMimes, $method, $endpoint);
+            $routeHandler = $this->router->selectRouteHandler($validMimes, $method, $endpoint);
         }
         catch (\Exception $e)
         {
-            $routeHandler = static::$router->selectDefaultRouteHandler();
+            $routeHandler = $this->router->selectDefaultRouteHandler();
         }
 
-        ob_end_clean();
+        if (ob_get_contents() !== false)
+        {
+            ob_end_clean();
+        }
         http_response_code($code->value);
         $routeHandler->setHeaders();
         echo $routeHandler->createErrorPage($error)->render();

@@ -10,6 +10,7 @@ use PamutProba\Controller\Web\WebProjektController;
 use PamutProba\Controller\Web\WebProjektDeleteController;
 use PamutProba\Controller\Web\WebProjektSaveController;
 use PamutProba\Core\App\Client\Client;
+use PamutProba\Core\App\Client\ErrorClient;
 use PamutProba\Core\App\Client\Middleware\FormUrlencodedBodyParser;
 use PamutProba\Core\App\Client\Middleware\HeaderNormalizeRequestUri;
 use PamutProba\Core\App\Client\Middleware\HeaderParseAccept;
@@ -22,6 +23,7 @@ use PamutProba\Core\App\Router\RouteHandler\HtmlRouteHandler;
 use PamutProba\Core\App\Router\RouteHandler\JsonRouteHandler;
 use PamutProba\Core\App\Session;
 use PamutProba\Core\Database\Database;
+use PamutProba\Core\Database\DatabaseServiceDriver;
 use PamutProba\Core\Database\MySQL\PDO\PdoDatabaseService;
 use PamutProba\Core\Exception\HttpException;
 use PamutProba\Core\Http\Method;
@@ -35,6 +37,7 @@ use PamutProba\Core\Utility\Development\Development;
 use PamutProba\Core\Utility\Development\DevelopmentService;
 use PamutProba\Core\Utility\Development\VoidDevelopmentService;
 use PamutProba\Core\Utility\Path;
+use PamutProba\Core\Utility\Url;
 use PamutProba\Database\DatabaseEntityType;
 use PamutProba\Entity\Owner;
 use PamutProba\Entity\Project;
@@ -58,13 +61,29 @@ try
             ? new DevelopmentService()
             : new VoidDevelopmentService()
     );
-    Database::set(new PdoDatabaseService(
-        Config::get("MYSQL")["HOST"],
-        Config::get("MYSQL")["PORT"],
-        Config::get("MYSQL")["USER"],
-        Config::get("MYSQL")["PASSWORD"],
-        Config::get("MYSQL")["DATABASE"]
-    ));
+
+    Session::start();
+
+    $client = new Client(
+        Request::from($_SERVER, $_GET, $_POST),
+        Session::from($_SESSION),
+        [
+            "api" => new JsonRouteHandler(MimeType::Json),
+            "web" => new HtmlRouteHandler(MimeType::Any)
+        ]
+    );
+    Url::updateHeaders($client->request()->headers()->all());
+
+    $client->use(
+        new HeaderNormalizeRequestUri(),
+        new HeaderParseAccept(),
+        new HeaderParseUnique(),
+        new JsonBodyParser(),
+        new FormUrlencodedBodyParser()
+    );
+    $client->applyMiddleware();
+    Url::updateHeaders($client->request()->headers()->all());
+
     Mail::set(
         match (Config::get("MAIL")["DRIVER"])
         {
@@ -73,56 +92,50 @@ try
         }
     );
 
-    Model::setDefaultStore(Database::get());
+    Model::setDefaultStore(
+        match (Config::get("MYSQL")["DRIVER"])
+        {
+            DatabaseServiceDriver::MySQLWithPdo => new PdoDatabaseService(
+                Config::get("MYSQL")["HOST"],
+                Config::get("MYSQL")["PORT"],
+                Config::get("MYSQL")["USER"],
+                Config::get("MYSQL")["PASSWORD"],
+                Config::get("MYSQL")["DATABASE"]
+            )
+        }
+    );
     Model::bind(Owner::class, DatabaseEntityType::Owner, OwnerFactory::validators());
     Model::bind(Status::class, DatabaseEntityType::Status, StatusFactory::validators());
     Model::bind(Project::class, DatabaseEntityType::Project, ProjectFactory::validators());
 
-    Session::start();
-
-    Client::use(
-        new HeaderNormalizeRequestUri(),
-        new HeaderParseAccept(),
-        new HeaderParseUnique(),
-        new JsonBodyParser(),
-        new FormUrlencodedBodyParser()
-    );
-    Client::create(
-        Request::from($_SERVER, $_GET, $_POST),
-        Session::from($_SESSION),
-        [
-            "api" => new JsonRouteHandler(MimeType::Json),
-            "web" => new HtmlRouteHandler(MimeType::Any)
-        ]
-    );
-
-    Client::router("web")->define(
+    $client->router("web")->define(
         Method::GET,
         "/",
         new WebHomeController(
-            Client::request(),
+            $client->request(),
+            $client->session(),
             new ProjectFactory(),
             new StatusFactory()
         )
     );
 
-    Client::router("web")->define(
+    $client->router("web")->define(
         Method::GET,
         "/projekt",
         new WebProjektController(
-            Client::request(),
-            Client::session(),
+            $client->request(),
+            $client->session(),
             new ProjectFactory(),
             new StatusFactory()
         )
     );
 
-    Client::router("web")->define(
+    $client->router("web")->define(
         Method::POST,
         "/projekt",
         new WebProjektSaveController(
-            Client::request(),
-            Client::session(),
+            $client->request(),
+            $client->session(),
             new StatusFactory(),
             new OwnerFactory(),
             new ProjectFactory(),
@@ -130,55 +143,65 @@ try
         )
     );
 
-    Client::router("web")->define(
+    $client->router("web")->define(
         Method::POST,
         "/projekt/torol",
         new WebProjektDeleteController(
-            Client::request(),
-            Client::session(),
+            $client->request(),
+            $client->session(),
             new ProjectFactory()
         )
     );
 
-    Client::router("api")->define(
+    $client->router("api")->define(
         Method::DELETE,
         "/api/projekt",
         new ApiProjektDeleteController(
-            Client::request(),
+            $client->request(),
             new ProjectFactory()
         )
     );
 
     if (Development::isDev())
     {
-        Client::router("web")->define(
+        $client->router("web")->define(
             Method::GET,
             "/dev/random",
             new DevRandomController(
-                Client::request(),
-                Client::session(),
+                $client->request(),
+                $client->session(),
                 new ProjectFactory(),
                 new StatusFactory(),
                 new OwnerFactory()
             )
         );
 
-        Client::router("api")->define(
+        $client->router("api")->define(
             Method::GET,
             "/dev/wait",
             new DevWaitController(
-                Client::request()
+                $client->request()
             )
         );
     }
 
-    Client::execute();
+    echo $client->execute(); exit();
 }
 catch (HttpException $e)
 {
-    Client::exitWithError($e, \PamutProba\Core\Http\Status::from($e->getCode()));
+    if (!isset($client))
+    {
+        $client = new ErrorClient();
+    }
+
+    $client->exitWithError($e, \PamutProba\Core\Http\Status::from($e->getCode()));
 }
 catch (\Exception $e)
 {
-    Client::exitWithError($e);
+    if (!isset($client))
+    {
+        $client = new ErrorClient();
+    }
+
+    $client->exitWithError($e);
 }

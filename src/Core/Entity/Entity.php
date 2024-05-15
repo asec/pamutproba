@@ -22,6 +22,9 @@ abstract class Entity
         return $entity;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function diff(Entity $oldEntity): array
     {
         $className = static::class;

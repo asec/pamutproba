@@ -11,7 +11,7 @@ spl_autoload_register(/**
     $path = __DIR__ . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $realClass) . ".php";
     if (!is_file($path))
     {
-        throw new Exception("Missing class: '{$className}'");
+        throw new Exception("Missing class: '$className'");
     }
 
     require_once $path;

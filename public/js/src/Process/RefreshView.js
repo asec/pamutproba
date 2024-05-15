@@ -1,7 +1,7 @@
-import IProcess from "./IProcess";
-import $ from "../jquery";
-import Api from "../Api/Api";
-import {MessageType} from "../Message/Message";
+import IProcess from "./IProcess.js";
+import $ from "../jquery.js";
+import Api from "../Api/Api.js";
+import {MessageType} from "../Message/Message.js";
 
 /**
  * @enum {string}
@@ -52,6 +52,10 @@ class RefreshView extends IProcess
             if (e.message)
             {
                 this.message.add(e.message, MessageType.Error);
+            }
+            else
+            {
+                this.message.add("Ismeretlen hiba történt.", MessageType.Error);
             }
         }
 

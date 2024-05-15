@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace PamutProba\Core\App\Client\Middleware;
 
@@ -11,6 +11,7 @@ class HeaderParseUnique extends Middleware
         $prefix = "Pamut-";
         $headers = $request->headers()->all();
         $apacheHeaders = apache_request_headers();
+
         foreach ($apacheHeaders as $key => $value)
         {
             if (!str_starts_with($key, $prefix))

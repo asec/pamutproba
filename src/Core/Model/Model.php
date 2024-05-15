@@ -23,7 +23,7 @@ final class Model implements IModel
      * @var array<string, array<string, IValidator[]>>
      */
     protected static array $validatorCache = [];
-    protected static IDatabaseService $defaultStore;
+    protected static ?IDatabaseService $defaultStore = null;
     protected ?DatabaseEntityType $filterType = null;
     protected ?Entity $filterValue = null;
 
@@ -39,13 +39,38 @@ final class Model implements IModel
     )
     {}
 
+    public static function setDefaultStore(IDatabaseService $store): void
+    {
+        if (self::$defaultStore === null)
+        {
+            self::$defaultStore = $store;
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    protected static function defaultStore(): IDatabaseService
+    {
+        if (self::$defaultStore === null)
+        {
+            throw new \Exception(
+                "You need to specify a default store for the models or give the model a specific database " .
+                "service upon creation"
+            );
+        }
+
+        return self::$defaultStore;
+    }
+
     public static function for(string $entityType, ?IDatabaseService $store = null): self
     {
-        if (isset(self::$cache[$entityType]) && $cache = self::$cache[$entityType])
+        $isCached = isset(self::$cache[$entityType]);
+        if ($isCached && $cache = self::$cache[$entityType])
         {
             if ($store !== null)
             {
-                $storageClass = get_class($store);
+                $storageClass = get_class($store) . "#" . spl_object_id($store);
                 if (isset($cache[$storageClass]))
                 {
                     return $cache[$storageClass];
@@ -53,29 +78,24 @@ final class Model implements IModel
             }
             else
             {
-                $storageClass = get_class(self::$defaultStore);
+                $storageClass = get_class(self::defaultStore());
                 $cachedStorageClasses = array_keys($cache);
                 if (in_array($storageClass, $cachedStorageClasses))
                 {
                     return $cache[$storageClass];
                 }
-                else if (count($cachedStorageClasses) > 0)
-                {
-                    return $cache[array_shift($cachedStorageClasses)];
-                }
             }
         }
 
-        $storageClass = get_class($store ?? self::$defaultStore);
-        $model = new self($entityType, $store ?? self::$defaultStore, self::$validatorCache[$entityType] ?? []);
+        $storageClass = get_class($store ?? self::defaultStore());
+        if ($store !== null)
+        {
+            $storageClass .= "#" . spl_object_id($store);
+        }
+        $model = new self($entityType, $store ?? self::defaultStore(), self::$validatorCache[$entityType] ?? []);
         self::$cache[$entityType][$storageClass] = $model;
 
         return $model;
-    }
-
-    public static function setDefaultStore(IDatabaseService $store): void
-    {
-        self::$defaultStore = $store;
     }
 
     /**
@@ -116,7 +136,7 @@ final class Model implements IModel
         {
             foreach ($validatorObjects as $validator)
             {
-                $validator($field, $entity);
+                $validator($field, $entity, $this->store);
             }
         }
     }

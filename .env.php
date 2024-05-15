@@ -1,6 +1,7 @@
 <?php
 
 use PamutProba\Core\App\Environment;
+use PamutProba\Core\Database\DatabaseServiceDriver;
 use PamutProba\Core\Mail\MailServiceDriver;
 
 return [
@@ -8,7 +9,7 @@ return [
     "APP_TITLE" => "WeLove Test",
 
     "MYSQL" => [
-        "DRIVER" => "pdo",
+        "DRIVER" => DatabaseServiceDriver::MySQLWithPdo,
         "HOST" => "localhost",
         "PORT" => 3306,
         "USER" => "root",

@@ -27,7 +27,15 @@ class DevRandomController implements IController
         $count = (int) $this->request->getParam("count") ?: 10;
 
         $statuses = $this->statusFactory->list();
+        if (!$statuses)
+        {
+            throw new \Exception("A művelethez kérlek, vigyél fel először státuszokat.");
+        }
         $owners = $this->ownerFactory->list();
+        if (!$owners)
+        {
+            throw new \Exception("A művelethez kérlek, vigyél fel először kapcsolattartókat.");
+        }
 
         for ($i = 0; $i < $count; $i++)
         {

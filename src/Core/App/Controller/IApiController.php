@@ -4,7 +4,7 @@ namespace PamutProba\Core\App\Controller;
 
 use PamutProba\Core\App\View\JsonView;
 
-interface IApiController extends \PamutProba\Core\App\Controller\IController
+interface IApiController extends IController
 {
     public function __invoke(): JsonView;
 }

@@ -20,7 +20,7 @@ abstract class RouteHandler
     }
 
     /**
-     * @param \PamutProba\Core\Http\Method $method
+     * @param Method $method
      * @param string $endpoint
      * @param (\Closure(): View)|IController $action
      * @throws \Exception

@@ -58,7 +58,6 @@ class VoidMailService implements IMailService
             $currentPath[] = $dir;
             if (!is_dir(Path::absolute(implode("/", $currentPath))))
             {
-                echo "dir made: " . Path::absolute(implode("/", $currentPath)) . "\n";
                 mkdir(Path::absolute(implode("/", $currentPath)));
             }
         }

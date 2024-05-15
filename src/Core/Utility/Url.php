@@ -2,11 +2,10 @@
 
 namespace PamutProba\Core\Utility;
 
-use PamutProba\Core\App\Client\Client;
-
 class Url
 {
     protected static string $base;
+    protected static array $headers = [];
 
     public static function base(string $url = null): string
     {
@@ -14,17 +13,22 @@ class Url
         {
             static::$base = implode("", [
                 "http",
-                !empty($_SERVER["HTTPS"]) ? "s" : "",
+                !empty(static::$headers["HTTPS"]) ? "s" : "",
                 "://",
-                $_SERVER["HTTP_HOST"]
+                static::$headers["HTTP_HOST"]
             ]);
         }
         return static::$base . ($url ?? "/");
     }
 
+    public static function updateHeaders(array $headers): void
+    {
+        static::$headers = $headers;
+    }
+
     public static function current(array $params = []): string
     {
-        $url = static::base(Client::request()->getHeader("REQUEST_URI"));
+        $url = static::base(static::$headers["REQUEST_URI"]);
         if ($params)
         {
             foreach ($params as $key => $param)

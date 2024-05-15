@@ -3,7 +3,7 @@
  * @var \PamutProba\Core\App\View\HtmlView $this
  */
 
-use PamutProba\Core\App\View\HtmlView;
+use PamutProba\Core\App\Config;
 use PamutProba\Core\Utility\Url;
 
 $currentProjectId = $this->data->has("project") ? $this->data->get("project")->id : null;
@@ -11,7 +11,7 @@ $currentProjectId = $this->data->has("project") ? $this->data->get("project")->i
 <header>
     <nav class="navbar navbar-expand-lg bg-dark" data-bs-theme="dark">
         <div class="container-fluid">
-            <a href="<?php echo Url::base() ?>" class="navbar-brand">WeLove Test</a>
+            <a href="<?php echo Url::base() ?>" class="navbar-brand"><?php echo Config::get("APP_TITLE") ?></a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain" aria-controls="navMain" aria-expanded="false" aria-label="Navigáció">
                 <span class="navbar-toggler-icon"></span>
             </button>

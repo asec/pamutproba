@@ -2,6 +2,7 @@
 
 namespace PamutProba\Core\Validation;
 
+use PamutProba\Core\Database\IDatabaseService;
 use PamutProba\Core\Entity\Entity;
 use PamutProba\Core\Exception\ValidationException;
 
@@ -13,7 +14,7 @@ class StringLength implements IValidator
     )
     {}
 
-    public function __invoke(string $field, Entity $entity): void
+    public function __invoke(string $field, Entity $entity, IDatabaseService $service): void
     {
         $value = $entity->$field;
         if (!is_string($value))

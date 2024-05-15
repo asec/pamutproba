@@ -43,7 +43,9 @@ class WebProjektController implements IWebController
         return new HtmlView(Path::template("projekt.php"), [
             "title" => $project && $project->id ? "Projekt szerkesztése" : "Projekt Létrehozása",
             "project" => $project,
-            "statuses" => $this->statusFactory->list()
+            "statuses" => $this->statusFactory->list(),
+            "message-success" => $this->session->getFlashed("message-success") ?? "",
+            "message-error" => $this->session->getFlashed("message-error") ?? ""
         ]);
     }
 }

@@ -15,10 +15,11 @@ class Owner extends Entity
 
     public static function random(): Owner
     {
+        $id = rand(0, 100);
         return new Owner(
             null,
-            "Test Owner",
-            "test@test.io"
+            "Test Owner #$id",
+            "test@test.io$id"
         );
     }
 }

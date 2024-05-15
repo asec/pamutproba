@@ -14,6 +14,6 @@ use PamutProba\Core\Utility\Url;
             apiEntryPoint: "<?php echo Url::base() ?>"
         };
     </script>
-    <script type="module" src="<?php echo Url::base("/js/App.js") ?>"></script>
+    <script type="module" src="<?php echo Url::base("/js/app.js") ?>"></script>
 </body>
 </html>

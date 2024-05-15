@@ -1,0 +1,37 @@
+name: pamutproba
+services:
+    web:
+        image: pamutproba:1.0.0
+        build:
+            context: .
+        ports:
+            -   8000:80
+        #volumes:
+        #    -   ./public:/var/www/html
+        #    -   ./logs:/var/www/logs
+        #    -   ./src:/var/www/src
+        #    -   ./templates:/var/www/templates
+        #    -   ./tests:/var/www/tests
+        #    -   ./vendor:/var/www/vendor
+        #    -   ./docker/.env.php:/var/www/.env.php
+        #    -   ./phpunit.xml:/var/www/phpunit.xml
+    mysql:
+        image: mysql/mysql-server:8.0
+        #ports:
+        #    -   3306:3306
+        environment:
+            MYSQL_USER: "root"
+            MYSQL_ROOT_PASSWORD: "password"
+            MYSQL_PASSWORD: "password"
+            MYSQL_DATABASE: "pamutproba"
+        volumes:
+            -   ./docker/welove_test.sql:/docker-entrypoint-initdb.d/pamutproba.sql
+    phpmyadmin:
+        image: phpmyadmin
+        restart: always
+        ports:
+            -   8001:80
+        environment:
+            PMA_HOST: "mysql"
+            PMA_USER: "root"
+            PMA_PASSWORD: "password"

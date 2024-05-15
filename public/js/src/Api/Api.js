@@ -1,10 +1,4 @@
-import $ from "../jquery";
-
-class jqXHR extends Promise
-{
-    abort()
-    {}
-}
+import $ from "../jquery.js";
 
 class Api
 {
@@ -69,6 +63,4 @@ class Api
         });
     }
 }
-
-export { jqXHR };
 export default Api;
